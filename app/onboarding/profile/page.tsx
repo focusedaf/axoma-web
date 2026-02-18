@@ -1,3 +1,9 @@
+import ProfessorProfileForm from "@/components/ui-elements/forms/professorProfileForm";
+
 export default function ProfilePage() {
-  return <div>Profile</div>;
+  return (
+    <div>
+      <ProfessorProfileForm />
+    </div>
+  );
 }
