@@ -1,5 +1,5 @@
 "use client";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "../ui/spinner";
@@ -10,19 +10,15 @@ interface AuthLayoutProps {
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    if (isLoggedIn === null) return;
+    if (loading) return;
 
-    if (isLoggedIn === false) {
+    if (!isAuthenticated) {
       router.push("/login");
-      return;
     }
-
-    setLoading(false);
-  }, [isLoggedIn, router]);
+  }, [isAuthenticated, loading, router]);
 
   if (loading) {
     return (
@@ -31,6 +27,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       </div>
     );
   }
+
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 };
