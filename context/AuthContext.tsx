@@ -1,99 +1,85 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser, logoutUser } from "@/lib/api";
 
-type AuthCtx = {
-  isLoggedIn: boolean | null;
-  user: {
-    email?: string;
-    name?: string;
-    id?: string;
-    role?: string;
-  } | null;
-  login: () => void;
-  logout: () => Promise<void>;
-  refresh: () => Promise<void>;
+type Role = "professor" | "recruiter" | "institution";
+
+type User = {
+  id: string;
+  email: string;
+  role: Role;
 };
 
-const AuthContext = createContext<AuthCtx | undefined>(undefined);
+type AuthContextType = {
+  user: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  login: (data: User) => void;
+  logout: () => void;
+  setRole: (role: Role) => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [user, setUser] = useState<AuthCtx["user"]>(null);
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const hydrateFromSession = async () => {
-    try {
-      const resp = await getCurrentUser();
-      console.log(" API Response:", resp?.data);
-
-      const u = resp?.data?.data?.user;
-
-      if (!u) throw new Error("No user");
-
-      const role =
-        u.role ||
-        localStorage.getItem("auth_role") ||
-        localStorage.getItem("pending_role");
-
-      console.log("User data:", u);
-      console.log(" Role:", role);
-
-      setIsLoggedIn(true);
-      setUser({
-        email: u.email,
-        name: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
-        id: u.userId || u.id,
-        role: role,
-      });
-
-      if (role) {
-        localStorage.setItem("auth_role", role);
-      }
-    } catch (error) {
-      console.error(" Hydration error:", error);
-      setIsLoggedIn(false);
-      setUser(null);
-    }
-  };
-
+  // Hydrate once
   useEffect(() => {
-    hydrateFromSession();
+    try {
+      const stored = localStorage.getItem("axoma_user");
+
+      if (stored) {
+        const parsed: User = JSON.parse(stored);
+        setUser(parsed);
+      }
+    } catch (err) {
+      console.error("Auth hydration error:", err);
+      localStorage.removeItem("axoma_user");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const login = async () => {
-    hydrateFromSession();
-  };
+  const login = useCallback((data: User) => {
+    setUser(data);
+    localStorage.setItem("axoma_user", JSON.stringify(data));
+  }, []);
 
-  const logout = async () => {
-    try {
-      await logoutUser();
-    } catch {}
-
-    localStorage.removeItem("auth_role");
-    localStorage.removeItem("pending_role");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userPhone");
-
-    setIsLoggedIn(false);
+  const logout = useCallback(() => {
     setUser(null);
+    localStorage.removeItem("axoma_user");
     router.push("/login");
-  };
+  }, [router]);
 
-  const refresh = async () => {
-    await hydrateFromSession();
-  };
+  const setRole = useCallback((role: Role) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+
+      const updated = { ...prev, role };
+      localStorage.setItem("axoma_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        isLoggedIn,
         user,
+        isAuthenticated: !!user,
+        loading,
         login,
         logout,
-        refresh,
+        setRole,
       }}
     >
       {children}

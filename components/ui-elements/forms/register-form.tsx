@@ -15,12 +15,14 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import Metamask from "../buttons/Metamask";
 import RoleSelector from "../roleSelector";
+import { useAuth } from "@/context/AuthContext";
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
@@ -36,23 +38,10 @@ export function RegisterForm({
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [e.target.name]: e.target.value,
     }));
-  };
-
-  const handleLogin = () => {
-    router.push("/login");
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleWalletConnect = (address: string) => {
-    setWalletAddress(address);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,7 +53,7 @@ export function RegisterForm({
     }
 
     if (formData.role === "institution" && !formData.institutionName) {
-      toast.error("institution name is required");
+      toast.error("Institution name is required");
       return;
     }
 
@@ -83,15 +72,10 @@ export function RegisterForm({
 
     try {
       setIsLoading(true);
-
-      
-
       toast.success("Account created successfully!");
       router.push("/onboarding/profile");
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Error in creating account",
-      );
+      toast.error("Error creating account");
     } finally {
       setIsLoading(false);
     }
@@ -105,21 +89,14 @@ export function RegisterForm({
             <h1 className="text-xl font-bold">Welcome to Axoma</h1>
             <FieldDescription>
               Already have an account?{" "}
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLogin();
-                }}
-              >
+              <a href="#" onClick={() => router.push("/login")}>
                 Login
               </a>
             </FieldDescription>
           </div>
 
-          {/* Role */}
           <Field>
-            <FieldLabel htmlFor="role">I am a</FieldLabel>
+            <FieldLabel>I am a</FieldLabel>
             <RoleSelector
               value={formData.role}
               onChange={(value) =>
@@ -128,28 +105,21 @@ export function RegisterForm({
             />
           </Field>
 
-          {/* Individual (Professor / Recruiter) */}
           {formData.role && formData.role !== "institution" && (
-            <FieldGroup className="flex flex-col sm:flex-row gap-2 items-stretch">
+            <FieldGroup className="flex flex-col sm:flex-row gap-2">
               <Field>
-                <FieldLabel htmlFor="firstName">First Name</FieldLabel>
+                <FieldLabel>First Name</FieldLabel>
                 <Input
-                  id="firstName"
                   name="firstName"
-                  type="text"
-                  placeholder="momo"
                   value={formData.firstName}
                   onChange={handleInputChange}
                   required
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
+                <FieldLabel>Last Name</FieldLabel>
                 <Input
-                  id="lastName"
                   name="lastName"
-                  type="text"
-                  placeholder="momo"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
@@ -158,17 +128,11 @@ export function RegisterForm({
             </FieldGroup>
           )}
 
-          {/* Institution */}
           {formData.role === "institution" && (
             <Field>
-              <FieldLabel htmlFor="institutionName">
-                Institution Name
-              </FieldLabel>
+              <FieldLabel>Institution Name</FieldLabel>
               <Input
-                id="institutionName"
                 name="institutionName"
-                type="text"
-                placeholder="Axoma University"
                 value={formData.institutionName}
                 onChange={handleInputChange}
                 required
@@ -176,14 +140,10 @@ export function RegisterForm({
             </Field>
           )}
 
-          {/* Common Fields */}
           <Field>
-            <FieldLabel htmlFor="mobileNumber">Mobile Number</FieldLabel>
+            <FieldLabel>Mobile Number</FieldLabel>
             <Input
-              id="mobileNumber"
               name="mobileNumber"
-              type="tel"
-              placeholder="+91 3456789876"
               value={formData.mobileNumber}
               onChange={handleInputChange}
               required
@@ -191,12 +151,10 @@ export function RegisterForm({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
+            <FieldLabel>Email</FieldLabel>
             <Input
-              id="email"
               name="email"
               type="email"
-              placeholder="m@example.com"
               value={formData.email}
               onChange={handleInputChange}
               required
@@ -204,58 +162,41 @@ export function RegisterForm({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel>Password</FieldLabel>
             <div className="relative">
               <Input
-                id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="8 characters only"
                 required
                 className="pr-10"
               />
               <button
                 type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                tabIndex={-1}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="wallet">Wallet Address</FieldLabel>
-            <Input
-              id="wallet"
-              name="walletAddress"
-              type="text"
-              value={walletAddress}
-              placeholder="0x..."
-              readOnly
-              className={cn(
-                "font-mono text-xs sm:text-sm cursor-not-allowed",
-                walletAddress ? "bg-green-50 border-green-300" : "bg-gray-50",
-              )}
-            />
+            <FieldLabel>Wallet Address</FieldLabel>
+            <Input value={walletAddress} readOnly className="bg-gray-50" />
           </Field>
+
           <FieldGroup>
             <div className="flex flex-col sm:flex-row gap-3">
               <Metamask
-                onConnect={handleWalletConnect}
+                onConnect={setWalletAddress}
                 className="w-full sm:flex-1"
               />
               <Button
                 type="submit"
                 disabled={isLoading}
-                className=" w-full sm:flex-1 h-11 text-sm sm:text-base font-semibold tracking-wide cursor-pointer"
+                className="w-full sm:flex-1 h-11 font-semibold"
               >
                 {isLoading ? <Spinner /> : "Register"}
               </Button>
