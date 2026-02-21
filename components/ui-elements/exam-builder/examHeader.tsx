@@ -1,9 +1,11 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 interface ExamHeaderProps {
   currentStep: number;
+  role: "professor" | "institution";
   onBack: () => void;
   onCancel?: () => void;
   onSaveDraft?: () => void;
@@ -12,11 +14,20 @@ interface ExamHeaderProps {
 
 export function ExamHeader({
   currentStep,
+  role,
   onBack,
   onCancel,
   onSaveDraft,
   onPublish,
 }: ExamHeaderProps) {
+  const title =
+    role === "institution" ? "Create Institutional Exam" : "Create Manual Exam";
+
+  const subtitle =
+    role === "institution"
+      ? "Create a centralized institutional-level assessment"
+      : "Craft a new exam with a modern and intuitive interface";
+
   return (
     <div className="flex items-center justify-between pb-4 border-b">
       <div className="flex items-center gap-3">
@@ -26,16 +37,14 @@ export function ExamHeader({
           </Button>
         )}
         <div>
-          <h1 className="text-2xl font-bold">Create manual exam</h1>
-          <p className="text-xl text-muted-foreground">
-            Craft a new exam with a modern and intuitive interface
-          </p>
+          <h1 className="text-2xl font-bold">{title}</h1>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
       </div>
 
       <div className="flex gap-2">
         {onCancel && (
-          <Button variant="outline" className="  text-black" onClick={onCancel}>
+          <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         )}

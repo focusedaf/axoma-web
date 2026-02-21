@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { ExamData, Question } from "@/types/exam";
 import { useState } from "react";
-import DescriptiveEditor from "./descriptiveEditor";
-import McqEditor from "./mcqEditor";
+import DescriptiveEditor from "../exam-builder/descriptiveEditor";
+import McqEditor from "../exam-builder/mcqEditor";
 import { v4 as uuidv4 } from "uuid";
 
 interface QuestionEditorDialogProps {

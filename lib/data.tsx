@@ -305,3 +305,118 @@ export const recentResults: RecentResult[] = [
     status: "Passed",
   },
 ];
+
+// --------------------
+// INSTITUTION TYPES
+// --------------------
+
+export type InstitutionExam = {
+  id: string;
+  title: string;
+  candidates: number;
+  status: "Ongoing" | "Upcoming" | "Completed";
+  startDate: string;
+};
+
+export type InstitutionStatCard = {
+  title: string;
+  value: string;
+  icon: ReactNode;
+};
+
+// --------------------
+// INSTITUTION STATS
+// --------------------
+
+import {
+  Building2,
+  Users2,
+  AlertTriangle,
+  FileText,
+} from "lucide-react";
+
+export const institutionStatCards: InstitutionStatCard[] = [
+  {
+    title: "Total Exams",
+    value: "36",
+    icon: <FileText className="h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    title: "Active Exams",
+    value: "8",
+    icon: <Building2 className="h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    title: "Total Candidates",
+    value: "2,480",
+    icon: <Users2 className="h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    title: "Violations Flagged",
+    value: "24",
+    icon: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
+  },
+];
+
+// --------------------
+// INSTITUTION EXAMS
+// --------------------
+
+export const ongoingInstitutionExams: InstitutionExam[] = [
+  {
+    id: "inst_exm_001",
+    title: "Semester 1 Final - CS",
+    candidates: 420,
+    status: "Ongoing",
+    startDate: "10 Oct 2025",
+  },
+  {
+    id: "inst_exm_002",
+    title: "Midterm - Mechanical Engg",
+    candidates: 180,
+    status: "Ongoing",
+    startDate: "12 Oct 2025",
+  },
+];
+
+export const upcomingInstitutionExams: InstitutionExam[] = [
+  {
+    id: "inst_exm_003",
+    title: "Entrance Exam 2026",
+    candidates: 1200,
+    status: "Upcoming",
+    startDate: "20 Nov 2025",
+  },
+];
+
+export const completedInstitutionExams: InstitutionExam[] = [
+  {
+    id: "inst_exm_004",
+    title: "Placement Assessment - Round 1",
+    candidates: 300,
+    status: "Completed",
+    startDate: "01 Sept 2025",
+  },
+];
+
+// --------------------
+// INSTITUTION RECENT ACTIVITY
+// --------------------
+
+export const institutionRecentActivity: ActivityItem[] = [
+  {
+    id: "inst_act_001",
+    description: "Entrance Exam 2026 was created",
+    time: "3 hours ago",
+  },
+  {
+    id: "inst_act_002",
+    description: "15 violations flagged in Semester 1 Final",
+    time: "1 day ago",
+  },
+  {
+    id: "inst_act_003",
+    description: "Placement Assessment results published",
+    time: "2 days ago",
+  },
+];

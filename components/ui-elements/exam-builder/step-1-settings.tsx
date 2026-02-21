@@ -1,4 +1,5 @@
 "use client";
+
 import { UseFormReturn } from "react-hook-form";
 import { SettingsData } from "@/types/exam";
 import {
@@ -16,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Computer, Smartphone } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,21 +32,22 @@ interface Step1SettingsProps {
 export function Step1Settings({ form }: Step1SettingsProps) {
   return (
     <Form {...form}>
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-6">
           <Tabs defaultValue="basic" className="w-full">
             <TabsList className="flex border-b border-muted rounded-md overflow-hidden">
-              <TabsTrigger value="basic" className="flex-1 text-center">
+              <TabsTrigger value="basic" className="flex-1">
                 Basic Information
               </TabsTrigger>
-              <TabsTrigger value="type" className="flex-1 text-center">
+              <TabsTrigger value="type" className="flex-1">
                 Exam Type Settings
               </TabsTrigger>
-              <TabsTrigger value="time" className="flex-1 text-center">
+              <TabsTrigger value="time" className="flex-1">
                 Time & Duration
               </TabsTrigger>
             </TabsList>
 
+            {/* ---------------- BASIC TAB ---------------- */}
             <TabsContent value="basic">
               <Card className="mt-4">
                 <CardContent className="p-6 space-y-6">
@@ -79,6 +80,7 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                             {...field}
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -118,57 +120,10 @@ export function Step1Settings({ form }: Step1SettingsProps) {
               </Card>
             </TabsContent>
 
+            {/* ---------------- TYPE TAB ---------------- */}
             <TabsContent value="type">
               <Card className="mt-4">
                 <CardContent className="p-6 space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="deliveryType"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel>Exam Delivery Type</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            className="grid grid-cols-2 gap-4"
-                          >
-                            <FormItem>
-                              <RadioGroupItem
-                                value="paper"
-                                id="paper"
-                                className="sr-only"
-                              />
-                              <FormLabel
-                                htmlFor="paper"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary"
-                              >
-                                <Smartphone className="mb-3 h-6 w-6" />
-                                Paper Based
-                              </FormLabel>
-                            </FormItem>
-
-                            <FormItem>
-                              <RadioGroupItem
-                                value="computer"
-                                id="computer"
-                                className="sr-only"
-                              />
-                              <FormLabel
-                                htmlFor="computer"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary"
-                              >
-                                <Computer className="mb-3 h-6 w-6" />
-                                Computer Based
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="questionView"
@@ -177,29 +132,26 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                         <FormLabel>Question View</FormLabel>
                         <FormControl>
                           <RadioGroup
-                            onValueChange={field.onChange}
                             value={field.value}
-                            className="flex flex-col space-y-1"
+                            onValueChange={field.onChange}
+                            className="flex flex-col space-y-2"
                           >
-                            <FormItem className="flex items-center space-x-3">
-                              <FormControl>
-                                <RadioGroupItem value="all-in-one" />
-                              </FormControl>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="all-in-one" />
                               <FormLabel className="font-normal">
                                 All in One
                               </FormLabel>
-                            </FormItem>
+                            </div>
 
-                            <FormItem className="flex items-center space-x-3">
-                              <FormControl>
-                                <RadioGroupItem value="one-by-one" />
-                              </FormControl>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="one-by-one" />
                               <FormLabel className="font-normal">
                                 One by One
                               </FormLabel>
-                            </FormItem>
+                            </div>
                           </RadioGroup>
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -213,12 +165,14 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                         render={({ field }) => (
                           <FormItem className="flex items-center justify-between">
                             <FormLabel className="font-normal">
-                              Shuffle questions for all students
+                              Shuffle questions
                             </FormLabel>
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) =>
+                                  field.onChange(!!value)
+                                }
                               />
                             </FormControl>
                           </FormItem>
@@ -231,12 +185,14 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                         render={({ field }) => (
                           <FormItem className="flex items-center justify-between">
                             <FormLabel className="font-normal">
-                              Show results after finishing exam
+                              Show results after exam
                             </FormLabel>
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) =>
+                                  field.onChange(!!value)
+                                }
                               />
                             </FormControl>
                           </FormItem>
@@ -248,6 +204,7 @@ export function Step1Settings({ form }: Step1SettingsProps) {
               </Card>
             </TabsContent>
 
+            {/* ---------------- TIME TAB ---------------- */}
             <TabsContent value="time">
               <Card className="mt-4">
                 <CardContent className="p-6 space-y-6">
@@ -261,7 +218,7 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                           <Input
                             type="number"
                             placeholder="60"
-                            {...field}
+                            value={field.value}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }

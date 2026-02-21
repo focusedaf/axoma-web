@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
-import { ExamStepper } from "../ui-elements/professorDash/examStepper";
-import { ExamHeader } from "../ui-elements/professorDash/examHeader";
+import { ExamStepper } from "../ui-elements/exam-builder/examStepper";
+import { ExamHeader } from "../ui-elements/exam-builder/examHeader";
 import { Button } from "@/components/ui/button";
 
 interface WizardLayoutProps {
+  role: "professor" | "institution";
   currentStep: number;
   steps: { id: number; name: string }[];
   onNext: () => void;
@@ -20,6 +21,7 @@ interface WizardLayoutProps {
 }
 
 export function WizardLayout({
+  role,
   currentStep,
   steps,
   onNext,
@@ -36,6 +38,7 @@ export function WizardLayout({
   return (
     <div className="container mx-auto max-w-7xl p-8 space-y-6">
       <ExamHeader
+        role={role}
         currentStep={currentStep}
         onBack={onBack}
         onCancel={onCancel}
@@ -48,12 +51,17 @@ export function WizardLayout({
       <div className="mt-8">{children}</div>
 
       <div className="flex justify-end gap-2 mt-4">
-        <Button onClick={onBack} disabled={isPrevDisabled}>
-          {prevButtonLabel || "Prev"}
-        </Button>
-        <Button onClick={onNext} disabled={isNextDisabled}>
-          {nextButtonLabel || "Next"}
-        </Button>
+        {currentStep > 1 && (
+          <Button onClick={onBack} disabled={isPrevDisabled}>
+            {prevButtonLabel || "Prev"}
+          </Button>
+        )}
+
+        {currentStep < steps.length && (
+          <Button onClick={onNext} disabled={isNextDisabled}>
+            {nextButtonLabel || "Next"}
+          </Button>
+        )}
       </div>
     </div>
   );

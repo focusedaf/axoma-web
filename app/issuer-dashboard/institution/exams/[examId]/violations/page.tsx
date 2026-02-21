@@ -4,66 +4,66 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-type Case = {
+type Violation = {
   id: string;
-  candidate: string;
+  student: string;
   warnings: number;
   issues: string[];
   status: "completed" | "terminated";
 };
 
-const cases: Case[] = [
+const violations: Violation[] = [
   {
     id: "1",
-    candidate: "John Doe",
+    student: "John Doe",
     warnings: 3,
-    issues: ["Multiple faces detected"],
+    issues: ["Multiple faces detected", "Looking away repeatedly"],
     status: "terminated",
   },
   {
     id: "2",
-    candidate: "Jane Smith",
+    student: "Jane Smith",
     warnings: 2,
     issues: ["Tab switching", "Window focus lost"],
     status: "completed",
   },
 ];
 
-const getStatusBadge = (status: Case["status"]) => {
+const getStatusBadge = (status: Violation["status"]) => {
   return status === "terminated" ? (
-    <Badge variant="destructive">Assessment Terminated</Badge>
+    <Badge variant="destructive">Session Terminated</Badge>
   ) : (
-    <Badge variant="outline">Completed</Badge>
+    <Badge variant="secondary">Completed</Badge>
   );
 };
 
-export default function RecruiterViolationsPage() {
+export default function InstitutionViolationsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Assessment Integrity Report</h1>
+        <h1 className="text-2xl font-bold">Exam Integrity Log</h1>
         <p className="text-sm text-muted-foreground">
-          Backend Developer Hiring Test
+          Auto-enforced proctor events
         </p>
       </div>
 
-      {cases.map((item) => (
+      {violations.map((item) => (
         <Card key={item.id}>
           <CardHeader className="flex justify-between items-center">
-            <CardTitle>{item.candidate}</CardTitle>
+            <CardTitle>{item.student}</CardTitle>
             {getStatusBadge(item.status)}
           </CardHeader>
 
           <CardContent className="space-y-4">
             <div className="flex justify-between text-sm">
-              <span>Warnings Issued</span>
+              <span>Total Warnings</span>
               <span className="font-medium">{item.warnings}/3</span>
             </div>
 
             <Separator />
 
             <div className="space-y-2 text-sm">
-              <p className="font-medium">Flagged Events</p>
+              <p className="font-medium">Detected Events</p>
               {item.issues.map((issue, idx) => (
                 <p key={idx} className="text-muted-foreground">
                   • {issue}

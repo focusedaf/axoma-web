@@ -36,7 +36,7 @@ const getStatusBadge = (status: ViolationRecord["status"]) => {
   );
 };
 
-export default function GlobalProfessorViolationsPage() {
+export default function GlobalRecruiterViolationsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Integrity Overview</h1>
