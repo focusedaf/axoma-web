@@ -5,19 +5,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Role } from "@/types/auth";
 
 interface RoleSelectorProps {
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: Role | null;
+  onChange?: (value: Role) => void;
   disabled?: boolean;
 }
 
 const RoleSelector = ({ value, onChange, disabled }: RoleSelectorProps) => {
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
+    <Select
+      value={value ?? undefined} 
+      onValueChange={(val) => onChange?.(val as Role)}
+      disabled={disabled}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select your role" />
       </SelectTrigger>
+
       <SelectContent>
         <SelectItem value="professor">Professor</SelectItem>
         <SelectItem value="recruiter">Recruiter</SelectItem>

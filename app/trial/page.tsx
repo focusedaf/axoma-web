@@ -24,10 +24,12 @@ import ExamViolationsPage from "../issuer-dashboard/professor/review-exam/[examI
 import GlobalInstitutionViolationsPage from "../issuer-dashboard/institution/violations/page";
 import GlobalProfessorViolationsPage from "../issuer-dashboard/professor/violations/page";
 import GlobalRecruiterViolationsPage from "../issuer-dashboard/recruiter/violations/page";
+import ReviewExamPage from "../issuer-dashboard/professor/review-exam/page";
 
 export default function Trial() {
   return (
     <div>
+      <ReviewExamPage/>
       <GlobalInstitutionViolationsPage />
       <GlobalProfessorViolationsPage />
       <GlobalRecruiterViolationsPage />

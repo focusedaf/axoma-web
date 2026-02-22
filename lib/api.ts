@@ -6,19 +6,8 @@ if (!BASE_URL) {
   throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
 }
 
-const endpoint = (path?: string) => {
-  if (!path) {
-    throw new Error("API endpoint is undefined");
-  }
 
-  if (path.startsWith("/")) {
-    throw new Error(`Endpoint must NOT start with '/': ${path}`);
-  }
-
-  return path;
-};
-
-export const primaryApi = axios.create({
+export const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
@@ -26,7 +15,8 @@ export const primaryApi = axios.create({
   },
 });
 
-primaryApi.interceptors.response.use(
+
+api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -35,8 +25,8 @@ primaryApi.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await refreshToken();
-        return primaryApi(originalRequest);
+        // OPTIONAL: Add refresh logic later
+        return api(originalRequest);
       } catch (refreshError) {
         window.location.href = "/login";
         return Promise.reject(refreshError);
@@ -48,55 +38,20 @@ primaryApi.interceptors.response.use(
 );
 
 
-export const registerProfessor = (payload: any) =>
-  primaryApi.post(
-    endpoint(process.env.NEXT_PUBLIC_API_REGISTER_PROFESSOR),
-    payload,
-  );
 
-export const loginProfessor = (payload: any) =>
-  primaryApi.post(
-    endpoint(process.env.NEXT_PUBLIC_API_LOGIN_PROFESSOR),
-    payload,
-  );
-
-export const getCurrentUser = () =>
-  primaryApi.get(endpoint(process.env.NEXT_PUBLIC_API_ME));
-
-export const logoutUser = () =>
-  primaryApi.post(endpoint(process.env.NEXT_PUBLIC_API_LOGOUT));
-
-export const refreshToken = () =>
-  primaryApi.post(endpoint(process.env.NEXT_PUBLIC_API_REFRESH));
-
-export const createProfile = async (payload: any) => {
-  try {
-    return await primaryApi.post(
-      endpoint(process.env.NEXT_PUBLIC_API_SETUP_PROFILE),
-      payload,
-    );
-  } catch (err: any) {
-    if (err.response?.status === 409) {
-      return await editProfile(payload);
-    }
-    throw err;
-  }
+export const registerIssuer = (payload: {
+  role: "professor" | "recruiter" | "institution";
+  firstName?: string;
+  lastName?: string;
+  institutionName?: string;
+  mobileNumber: string;
+  email: string;
+  password: string;
+  walletAddress: string;
+}) => {
+  return api.post("/auth/issuer/register", payload);
 };
 
-export const editProfile = (payload: any) =>
-  primaryApi.post(endpoint(process.env.NEXT_PUBLIC_API_EDIT_PROFILE), payload);
-
-export const getProfile = () =>
-  primaryApi.get(endpoint(process.env.NEXT_PUBLIC_API_GET_PROFILE));
-
-export const addDocuments = (formData: FormData) =>
-  primaryApi.post(endpoint(process.env.NEXT_PUBLIC_API_ADD_DOCS), formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-export const getDocuments = () =>
-  primaryApi.get(endpoint(process.env.NEXT_PUBLIC_API_GET_DOCS));
-
-
+export const loginIssuer = (payload: { email: string; password: string }) => {
+  return api.post("/auth/issuer/login", payload);
+};

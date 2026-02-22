@@ -25,7 +25,7 @@ export default function GradeExamPage() {
   useEffect(() => {
     const loadedExam = examStore.getById(examId);
     if (!loadedExam) {
-      router.push("/dashboard/professor/review-exam");
+      router.push("/issuer-dashboard/professor/review-exam");
       return;
     }
     setExam(loadedExam);

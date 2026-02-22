@@ -25,26 +25,34 @@ const data = {
     professor: [
       {
         title: "Create Exams",
-        url: "/dashboard/professor/create-exam",
+        url: "/issuer-dashboard/professor/create-exam",
         icon: IconSend,
       },
       {
         title: "Review Exams",
-        url: "/dashboard/professor/review-exam",
+        url: "/issuer-dashboard/professor/review-exam",
         icon: IconUsers,
       },
       {
         title: "Exam History",
-        url: "/dashboard/professor/history",
+        url: "/issuer-dashboard/professor/history",
         icon: IconHistory,
       },
     ],
     student: [
-      { title: "Exams", url: "/dashboard/student/exams", icon: IconSend },
-      { title: "Results", url: "/dashboard/student/results", icon: IconWallet },
+      {
+        title: "Exams",
+        url: "/issuer-dashboard/student/exams",
+        icon: IconSend,
+      },
+      {
+        title: "Results",
+        url: "/issuer-dashboard/student/results",
+        icon: IconWallet,
+      },
       {
         title: "History",
-        url: "/dashboard/student/history",
+        url: "/issuer-dashboard/student/history",
         icon: IconHistory,
       },
     ],

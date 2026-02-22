@@ -90,7 +90,7 @@ export function ReviewExam({ exams }: ReviewExamProps) {
                   <Button
                     size="sm"
                     onClick={() =>
-                      router.push(`/dashboard/professor/review-exam/${exam.id}`)
+                      router.push(`/issuer-dashboard/professor/review-exam/${exam.id}`)
                     }
                   >
                     Grade

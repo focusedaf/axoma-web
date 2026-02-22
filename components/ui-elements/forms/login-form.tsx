@@ -42,7 +42,7 @@ export function LoginForm({
     try {
       setIsLoading(true);
       toast.success("Logged in successfully");
-      router.push("/dashboard");
+      router.push("/issuer-dashboard");
     } catch {
       toast.error("Invalid email or password");
     } finally {

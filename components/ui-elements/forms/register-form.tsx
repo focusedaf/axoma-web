@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,18 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import Metamask from "../buttons/Metamask";
 import RoleSelector from "../roleSelector";
+import { registerIssuer } from "@/lib/api";
+import { Role } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  institutionName: string;
+  mobileNumber: string;
+  role: Role | null;
+  email: string;
+  password: string;
+}
 
 export function RegisterForm({
   className,
@@ -27,12 +39,12 @@ export function RegisterForm({
   const [showPassword, setShowPassword] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     firstName: "",
     lastName: "",
     institutionName: "",
     mobileNumber: "",
-    role: "",
+    role: null,
     email: "",
     password: "",
   });
@@ -72,9 +84,17 @@ export function RegisterForm({
 
     try {
       setIsLoading(true);
+
+      const res = await registerIssuer({
+        ...formData,
+        role: formData.role,
+        walletAddress,
+      });
+
+      login(res.data.user);
       toast.success("Account created successfully!");
       router.push("/onboarding/profile");
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Error creating account");
     } finally {
       setIsLoading(false);
@@ -99,7 +119,7 @@ export function RegisterForm({
             <FieldLabel>I am a</FieldLabel>
             <RoleSelector
               value={formData.role}
-              onChange={(value) =>
+              onChange={(value: Role) =>
                 setFormData((prev) => ({ ...prev, role: value }))
               }
             />

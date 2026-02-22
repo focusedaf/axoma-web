@@ -8,14 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-
-type Role = "professor" | "recruiter" | "institution";
-
-type User = {
-  id: string;
-  email: string;
-  role: Role;
-};
+import { Role, User } from "@/types/auth";
 
 type AuthContextType = {
   user: User | null;
@@ -37,7 +30,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     try {
       const stored = localStorage.getItem("axoma_user");
-
       if (stored) {
         const parsed: User = JSON.parse(stored);
         setUser(parsed);
