@@ -6,6 +6,7 @@ import ProfessorProfileForm from "@/components/ui-elements/forms/professorProfil
 import InstitutionProfileForm from "@/components/ui-elements/forms/institutionProfileForm";
 import RecruiterProfileForm from "@/components/ui-elements/forms/recruiterProfileForm";
 import { Spinner } from "@/components/ui/spinner";
+import { OL } from "@/components/layout/OnboardingLayout";
 
 export default function ProfilePage() {
   const { user, loading, isAuthenticated } = useAuth();

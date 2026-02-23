@@ -93,7 +93,7 @@ export function RegisterForm({
 
       login(res.data.user);
       toast.success("Account created successfully!");
-      router.push("/onboarding/profile");
+      router.push("/onboarding");
     } catch (error) {
       toast.error("Error creating account");
     } finally {

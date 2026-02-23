@@ -84,7 +84,7 @@ export default function ProfessorProfileForm({
   return (
     <div className={cn("flex flex-col gap-8 w-full md:max-w-7xl", className)}>
       <form onSubmit={handleSubmit} id="profile-form">
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
+       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field className="w-full max-w-xl">
             <FieldLabel>University Name</FieldLabel>
             <Input
@@ -105,7 +105,7 @@ export default function ProfessorProfileForm({
           </Field>
         </FieldGroup>
 
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
+       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field className="w-full max-w-xl">
             <FieldLabel>Department</FieldLabel>
             <Input
@@ -126,7 +126,7 @@ export default function ProfessorProfileForm({
           </Field>
         </FieldGroup>
 
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
+       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field className="w-full max-w-xl">
             <FieldLabel>Joining Year</FieldLabel>
             <Input

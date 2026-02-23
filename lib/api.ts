@@ -2,10 +2,7 @@ import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-if (!BASE_URL) {
-  throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
-}
-
+if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -15,29 +12,29 @@ export const api = axios.create({
   },
 });
 
-
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/refresh")
+    ) {
       originalRequest._retry = true;
 
       try {
-        // OPTIONAL: Add refresh logic later
+        await api.post("/auth/refresh");
         return api(originalRequest);
-      } catch (refreshError) {
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
+      } catch {
+        return Promise.reject(error);
       }
     }
 
     return Promise.reject(error);
   },
 );
-
-
 
 export const registerIssuer = (payload: {
   role: "professor" | "recruiter" | "institution";
@@ -48,10 +45,11 @@ export const registerIssuer = (payload: {
   email: string;
   password: string;
   walletAddress: string;
-}) => {
-  return api.post("/auth/issuer/register", payload);
-};
+}) => api.post("/auth/issuer/register", payload);
 
-export const loginIssuer = (payload: { email: string; password: string }) => {
-  return api.post("/auth/issuer/login", payload);
-};
+export const loginIssuer = (payload: { email: string; password: string }) =>
+  api.post("/auth/issuer/login", payload);
+
+export const logoutIssuer = () => api.post("/auth/logout");
+
+export const fetchMeApi = () => api.get("/auth/me");

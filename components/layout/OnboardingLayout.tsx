@@ -32,20 +32,20 @@ export const OL: React.FC<OLProps> = ({
         <StepProgress currentStep={step} totalSteps={totalSteps} />
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col">
         {children}
 
-        <div
-          className={cn(
-            "mt-8 pt-6 border-t border-gray-200",
-            hideBack ? "flex justify-center" : "flex justify-between",
-          )}
-        >
-          {!hideBack && (
-            <Button variant="outline" onClick={onBack}>
-              ← Back
-            </Button>
-          )}
+        <div className="mt-8 pt-6 border-t border-gray-200 flex items-center">
+          <div>
+            {!hideBack && (
+              <Button variant="outline" onClick={onBack}>
+                ← Back
+              </Button>
+            )}
+          </div>
+
+          <div className="flex-1" />
+
           <Button onClick={onNext} disabled={isNextDisabled}>
             {nextLabel} →
           </Button>
