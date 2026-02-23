@@ -13,6 +13,7 @@ interface OLProps {
   nextLabel?: string;
   hideBack?: boolean;
   isNextDisabled?: boolean;
+  formId?: string;
 }
 
 export const OL: React.FC<OLProps> = ({
@@ -25,6 +26,7 @@ export const OL: React.FC<OLProps> = ({
   nextLabel = "Continue",
   hideBack = false,
   isNextDisabled = false,
+  formId,
 }) => {
   return (
     <div className={cn("max-w-3xl mx-auto px-4 py-8", className)}>
@@ -36,19 +38,23 @@ export const OL: React.FC<OLProps> = ({
         {children}
 
         <div className="mt-8 pt-6 border-t border-gray-200 flex items-center">
-          <div>
-            {!hideBack && (
-              <Button variant="outline" onClick={onBack}>
-                ← Back
-              </Button>
-            )}
-          </div>
+          {!hideBack && (
+            <Button variant="outline" onClick={onBack}>
+              ← Back
+            </Button>
+          )}
 
           <div className="flex-1" />
 
-          <Button onClick={onNext} disabled={isNextDisabled}>
-            {nextLabel} →
-          </Button>
+          {formId ? (
+            <Button type="submit" form={formId} disabled={isNextDisabled}>
+              {nextLabel} →
+            </Button>
+          ) : (
+            <Button type="button" onClick={onNext} disabled={isNextDisabled}>
+              {nextLabel} →
+            </Button>
+          )}
         </div>
       </div>
     </div>

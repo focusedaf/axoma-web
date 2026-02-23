@@ -38,22 +38,44 @@ const data = {
         url: "/issuer-dashboard/professor/history",
         icon: IconHistory,
       },
-    ],
-    student: [
       {
-        title: "Exams",
-        url: "/issuer-dashboard/student/exams",
+        title: "View Violations",
+        url: "/issuer-dashboard/professor/violations",
+        icon: IconUsers,
+      },
+    ],
+    recruiter: [
+      {
+        title: "Create Assessments",
+        url: "/issuer-dashboard/recruiter/create-assessment",
         icon: IconSend,
       },
       {
-        title: "Results",
-        url: "/issuer-dashboard/student/results",
-        icon: IconWallet,
+        title: "Manage Applicant",
+        url: "/issuer-dashboard/recruiter/assessments",
+        icon: IconUsers,
       },
       {
-        title: "History",
-        url: "/issuer-dashboard/student/history",
-        icon: IconHistory,
+        title: "View Violations",
+        url: "/issuer-dashboard/recruiter/violations",
+        icon: IconUsers,
+      },
+    ],
+    institution: [
+      {
+        title: "Create Exams",
+        url: "/issuer-dashboard/institution/create-exam",
+        icon: IconUsers,
+      },
+      {
+        title: "Manage Exams",
+        url: "/issuer-dashboard/institution/exams",
+        icon: IconUsers,
+      },
+      {
+        title: "View Violations",
+        url: "/issuer-dashboard/institution/violations",
+        icon: IconUsers,
       },
     ],
   },
@@ -61,19 +83,37 @@ const data = {
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
-  const userRole = user?.role as "professor" | "student" | undefined;
+  const userRole = user?.role as
+    | "professor"
+    | "recruiter"
+    | "institution"
+    | undefined;
 
   const roleDashboard =
-    userRole === "student"
-      ? { title: "Dashboard", url: "/dashboard/student", icon: IconSquare }
-      : userRole === "professor"
-        ? { title: "Dashboard", url: "/dashboard/professor", icon: IconSquare }
-        : null;
+    userRole === "professor"
+      ? {
+          title: "Dashboard",
+          url: "/issuer-dashboard/professor",
+          icon: IconSquare,
+        }
+      : userRole === "recruiter"
+        ? {
+            title: "Dashboard",
+            url: "/issuer-dashboard/recruiter",
+            icon: IconSquare,
+          }
+        : userRole === "institution"
+          ? {
+              title: "Dashboard",
+              url: "/issuer-dashboard/institution",
+              icon: IconSquare,
+            }
+          : null;
 
   const items = [
     ...data.navMain.common,
     ...(roleDashboard ? [roleDashboard] : []),
-    ...(userRole ? data.navMain[userRole] : []),
+    ...(userRole && data.navMain[userRole] ? data.navMain[userRole] : []),
   ];
 
   return (

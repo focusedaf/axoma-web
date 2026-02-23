@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -11,171 +12,135 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-
-interface InstitutionProfile {
-  institutionName?: string;
-  industry?: string;
-  description?: string;
-  location?: string;
-  institutionType?: string;
-  institutionWebsite?: string;
-  yearEstablished?: string;
-}
-
-interface InstitutionProfileFormProps {
-  className?: string;
-  existingData?: InstitutionProfile;
-  onSuccess?: () => void;
-}
+import { upsertProfile } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useOnboarding } from "@/context/OnboardingContext";
 
 export default function InstitutionProfileForm({
   className,
-  existingData,
-  onSuccess,
-}: InstitutionProfileFormProps) {
-  const [formData, setFormData] = useState<InstitutionProfile>({
-    institutionName: "",
-    industry: "",
-    description: "",
-    location: "",
-    institutionType: "",
-    institutionWebsite: "",
-    yearEstablished: "",
-  });
+}: {
+  className?: string;
+}) {
+  const router = useRouter();
+  const { onboardingData, setOnboardingData } = useOnboarding();
+  const profile = onboardingData.institution;
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (existingData) setFormData(existingData);
-  }, [existingData]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const update = (field: keyof typeof profile, value: string) => {
+    setOnboardingData((prev) => ({
+      ...prev,
+      institution: { ...prev.institution, [field]: value },
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    const payload = {
+      institutionName: profile.institutionName,
+      industry: profile.industry,
+      description: profile.description || undefined,
+      location: profile.location,
+      institutionType: profile.institutionType,
+      institutionWebsite: profile.institutionWebsite || undefined,
+      yearEstablished: Number(profile.yearEstablished),
+    };
 
     try {
-      const payload = {
-        ...formData,
-        yearEstablished: formData.yearEstablished
-          ? Number(formData.yearEstablished)
-          : undefined,
-      };
-
-      //  axios shit
-
+      await upsertProfile(payload);
       toast.success("Profile saved successfully!");
-      onSuccess?.();
+      router.push("/onboarding/verify-docs");
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Error saving profile");
-    } finally {
-      setIsLoading(false);
+      console.error(err.response?.data || err);
+      toast.error("Failed to save profile. Check your input.");
     }
   };
 
   return (
-    <div className={cn("flex flex-col gap-8 w-full md:max-w-7xl", className)}>
-      <form onSubmit={handleSubmit} id="profile-form">
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Institution Name</FieldLabel>
-            <Input
-              name="institutionName"
-              value={formData.institutionName}
-              onChange={handleChange}
-              required
-            />
-          </Field>
-
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Industry</FieldLabel>
-            <Input
-              name="industry"
-              value={formData.industry}
-              onChange={handleChange}
-              required
-            />
-          </Field>
-        </FieldGroup>
-
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Location</FieldLabel>
-            <Input
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </Field>
-
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Website</FieldLabel>
-            <Input
-              name="institutionWebsite"
-              type="url"
-              value={formData.institutionWebsite}
-              onChange={handleChange}
-            />
-          </Field>
-        </FieldGroup>
-
-        <FieldGroup className="flex flex-col sm:flex-row gap-2 justify-between items-stretch">
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Year Established</FieldLabel>
-            <Input
-              name="yearEstablished"
-              value={formData.yearEstablished}
-              onChange={handleChange}
-              pattern="\d{4}"
-              placeholder="e.g. 1998"
-              required
-            />
-          </Field>
-
-          <Field className="w-full max-w-xl">
-            <FieldLabel>Institution Type</FieldLabel>
-            <Select
-              value={formData.institutionType}
-              onValueChange={(val) =>
-                setFormData((prev) => ({ ...prev, institutionType: val }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="university">University</SelectItem>
-                <SelectItem value="college">College</SelectItem>
-                <SelectItem value="school">School</SelectItem>
-                <SelectItem value="training_institute">
-                  Training Institute
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-        </FieldGroup>
-
-        <Field className="w-full max-w-7xl mt-2">
-          <FieldLabel>Description</FieldLabel>
-          <Textarea
-            name="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                description: e.target.value,
-              }))
-            }
-            rows={4}
-            placeholder="Briefly describe your institution..."
+    <form
+      id="profile-form"
+      onSubmit={handleSubmit}
+      className={cn("flex flex-col gap-6 w-full md:max-w-3xl", className)}
+    >
+      <FieldGroup className="flex flex-col sm:flex-row gap-4">
+        <Field className="w-full">
+          <FieldLabel>Institution Name</FieldLabel>
+          <Input
+            value={profile.institutionName}
+            onChange={(e) => update("institutionName", e.target.value)}
+            required
           />
         </Field>
-      </form>
-    </div>
+        <Field className="w-full">
+          <FieldLabel>Industry</FieldLabel>
+          <Input
+            value={profile.industry}
+            onChange={(e) => update("industry", e.target.value)}
+            required
+          />
+        </Field>
+      </FieldGroup>
+
+      <FieldGroup className="flex flex-col sm:flex-row gap-4">
+        <Field className="w-full">
+          <FieldLabel>Description</FieldLabel>
+          <Input
+            value={profile.description}
+            onChange={(e) => update("description", e.target.value)}
+          />
+        </Field>
+        <Field className="w-full">
+          <FieldLabel>Location</FieldLabel>
+          <Input
+            value={profile.location}
+            onChange={(e) => update("location", e.target.value)}
+            required
+          />
+        </Field>
+      </FieldGroup>
+
+      <FieldGroup className="flex flex-col sm:flex-row gap-4">
+        <Field className="w-full">
+          <FieldLabel>Institution Type</FieldLabel>
+          <Select
+            value={profile.institutionType}
+            onValueChange={(val) => update("institutionType", val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="university">University</SelectItem>
+              <SelectItem value="college">College</SelectItem>
+              <SelectItem value="school">School</SelectItem>
+              <SelectItem value="training_institute">
+                Training Institute
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field className="w-full">
+          <FieldLabel>Year Established</FieldLabel>
+          <Input
+            type="number"
+            value={profile.yearEstablished}
+            onChange={(e) => update("yearEstablished", e.target.value)}
+            required
+          />
+        </Field>
+      </FieldGroup>
+
+      <FieldGroup className="flex flex-col sm:flex-row gap-4">
+        <Field className="w-full">
+          <FieldLabel>Website</FieldLabel>
+          <Input
+            type="url"
+            value={profile.institutionWebsite}
+            onChange={(e) => update("institutionWebsite", e.target.value)}
+          />
+        </Field>
+      </FieldGroup>
+
+      <button type="submit" hidden />
+    </form>
   );
 }
