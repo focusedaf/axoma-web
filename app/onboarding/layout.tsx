@@ -19,6 +19,7 @@ export default function OnboardingLayout({
           step: 1,
           hideBack: true,
           nextRoute: "/onboarding/profile",
+          nextLabel: "Get Started",
         };
 
       case "/onboarding/profile":
@@ -27,6 +28,7 @@ export default function OnboardingLayout({
           hideBack: false,
           formId: "profile-form",
           backRoute: "/onboarding",
+          nextLabel: "Continue",
         };
 
       case "/onboarding/verify-docs":
@@ -35,6 +37,7 @@ export default function OnboardingLayout({
           hideBack: false,
           formId: "verify-docs-form",
           backRoute: "/onboarding/profile",
+          nextLabel: "Continue",
         };
 
       case "/onboarding/success":
@@ -42,6 +45,7 @@ export default function OnboardingLayout({
           step: 4,
           hideBack: true,
           nextRoute: "/issuer-dashboard",
+          nextLabel: "Go to Dashboard",
         };
 
       default:
@@ -49,11 +53,13 @@ export default function OnboardingLayout({
           step: 1,
           hideBack: true,
           nextRoute: "/onboarding/profile",
+          nextLabel: "Get Started",
         };
     }
   };
 
-  const { step, hideBack, nextRoute, formId, backRoute } = getStepInfo();
+  const { step, hideBack, nextRoute, formId, backRoute, nextLabel } =
+    getStepInfo();
 
   const handleBack = () => {
     if (backRoute) router.push(backRoute);
@@ -65,7 +71,7 @@ export default function OnboardingLayout({
 
   return (
     <OnboardingProvider>
-      <div className="min-h-screen w-full bg-linear-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50">
         <OL
           step={step}
           totalSteps={4}
@@ -73,6 +79,7 @@ export default function OnboardingLayout({
           onNext={handleNext}
           hideBack={hideBack}
           formId={formId}
+          nextLabel={nextLabel}
         >
           {children}
         </OL>

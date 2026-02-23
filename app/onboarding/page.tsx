@@ -3,8 +3,9 @@ import { ArrowBigRight } from "lucide-react";
 
 export default function OnboardingPage() {
   return (
-    <div className="flex flex-col justify-center items-center text-center space-y-6 px-4">
+    <div className="flex flex-col justify-center items-center text-center space-y-6 px-4 min-h-[60vh]">
       <h1 className="text-4xl font-bold text-gray-900">Welcome to Axoma!</h1>
+
       <p className="text-lg text-gray-600">
         Let's get your profile set up. This will only take 2 minutes.
       </p>
