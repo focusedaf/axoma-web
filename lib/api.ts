@@ -63,3 +63,8 @@ export const addDocuments = (formData: FormData) =>
   api.post("/onboarding/documents", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const loginAdmin = (payload: { email: string; password: string }) =>
+  api.post("/admin/login", payload);
+
+export const logoutAdmin = () => api.post("/admin/logout");

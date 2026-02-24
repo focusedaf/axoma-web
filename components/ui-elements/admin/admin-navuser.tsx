@@ -15,8 +15,19 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Settings, LogOut } from "lucide-react";
+import { toast } from "sonner";
+import { logoutAdmin } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export const AdminNavUser = () => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logoutAdmin();
+    toast.success("Logged out successfully!");
+    router.push("/admin-login");
+  };
+  
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -54,7 +65,10 @@ export const AdminNavUser = () => {
               Settings
             </DropdownMenuItem>
 
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive focus:text-destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>
