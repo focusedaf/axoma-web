@@ -68,3 +68,11 @@ export const loginAdmin = (payload: { email: string; password: string }) =>
   api.post("/admin/login", payload);
 
 export const logoutAdmin = () => api.post("/admin/logout");
+
+export const fetchIssuersAdmin = () => api.get("/admin/issuers");
+
+export const approveIssuerAdmin = (id: string) =>
+  api.patch(`/admin/issuers/${id}/approve`);
+
+export const suspendIssuerAdmin = (id: string) =>
+  api.patch(`/admin/issuers/${id}/suspend`);
