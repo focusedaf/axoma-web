@@ -14,6 +14,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/context/AuthContext";
+import { loginIssuer } from "@/lib/api";
 
 export function LoginForm({
   className,
@@ -41,10 +42,19 @@ export function LoginForm({
 
     try {
       setIsLoading(true);
+
+      const res = await loginIssuer({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      login(res.data.user);
+
       toast.success("Logged in successfully");
+
       router.push("/issuer-dashboard");
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
