@@ -37,18 +37,19 @@ export default function AllIssuersPage() {
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadIssuers = async () => {
-      try {
-        const res = await fetchIssuersAdmin();
-        setIssuers(res.data.data);
-      } catch (error) {
-        console.error("Failed to fetch issuers", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadIssuers = async () => {
+    try {
+      setLoading(true);
+      const res = await fetchIssuersAdmin();
+      setIssuers(res.data.data.filter((i: Issuer) => i.status !== "approved"));
+    } catch (error) {
+      console.error("Failed to fetch issuers", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadIssuers();
   }, []);
 
@@ -83,35 +84,25 @@ export default function AllIssuersPage() {
                 <TableCell>
                   <Badge
                     variant={
-                      issuer.status === "approved"
-                        ? "default"
-                        : issuer.status === "pending"
-                          ? "secondary"
-                          : "destructive"
+                      issuer.status === "pending" ? "secondary" : "destructive"
                     }
                   >
                     {issuer.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  {issuer.documents.length > 0 ? (
-                    <ul className="list-disc pl-5">
-                      {issuer.documents.map((doc) => (
-                        <li key={doc.id}>
-                          <a
-                            href={doc.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            {doc.type}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    "—"
-                  )}
+                <TableCell className="flex flex-wrap gap-2">
+                  {issuer.documents.length > 0
+                    ? issuer.documents.map((doc) => (
+                        <Button
+                          key={doc.id}
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(doc.fileUrl, "_blank")}
+                        >
+                          {doc.type}
+                        </Button>
+                      ))
+                    : "—"}
                 </TableCell>
                 <TableCell>
                   <Link href={`/admin-dashboard/issuers/${issuer.id}`}>
