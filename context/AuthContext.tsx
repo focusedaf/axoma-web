@@ -76,12 +76,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    try {
      if (user?.role === "admin") {
        await logoutAdmin();
+       router.replace("/admin-login");
      } else {
        await logoutIssuer();
+       router.replace("/login");
      }
    } catch {}
 
-   router.replace("/login");
+   
  }, [router, user]);
 
   const setRole = useCallback((role: Role) => {

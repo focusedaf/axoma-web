@@ -22,7 +22,7 @@ interface IssuerDocument {
 interface Issuer {
   id: string;
   role: "institution" | "professor" | "recruiter";
-  status: string;
+  status: "pending" | "approved" | "suspended";
   email: string;
   firstName?: string;
   lastName?: string;
@@ -37,7 +37,8 @@ export default function IssuerDetailsPage() {
   const id = params.id as string;
 
   const [issuer, setIssuer] = useState<Issuer | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const loadIssuer = async () => {
     try {
@@ -57,7 +58,7 @@ export default function IssuerDetailsPage() {
     if (id) loadIssuer();
   }, [id]);
 
-  if (!issuer || loading) return <Spinner />;
+  if (loading || !issuer) return <Spinner />;
 
   const displayName =
     issuer.role === "institution"
@@ -66,29 +67,43 @@ export default function IssuerDetailsPage() {
 
   const handleApprove = async () => {
     try {
-      setLoading(true);
+      setActionLoading(true);
       await approveIssuerAdmin(id);
+
+      setIssuer((prev) => (prev ? { ...prev, status: "approved" } : prev));
+
       toast.success("Issuer approved!");
-      router.back(); 
+
+      setTimeout(() => {
+        router.push("/admin-dashboard/issuers");
+        router.refresh();
+      }, 500);
     } catch (error) {
       console.error(error);
       toast.error("Failed to approve issuer");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
   const handleSuspend = async () => {
     try {
-      setLoading(true);
+      setActionLoading(true);
       await suspendIssuerAdmin(id);
+
+      setIssuer((prev) => (prev ? { ...prev, status: "suspended" } : prev));
+
       toast.success("Issuer suspended!");
-      router.back();
+
+      setTimeout(() => {
+        router.push("/admin-dashboard/issuers");
+        router.refresh();
+      }, 500);
     } catch (error) {
       console.error(error);
       toast.error("Failed to suspend issuer");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
@@ -111,7 +126,18 @@ export default function IssuerDetailsPage() {
             <strong>Wallet:</strong> {issuer.walletAddress || "—"}
           </p>
           <p>
-            <strong>Status:</strong> <Badge>{issuer.status}</Badge>
+            <strong>Status:</strong>{" "}
+            <Badge
+              variant={
+                issuer.status === "pending"
+                  ? "secondary"
+                  : issuer.status === "approved"
+                    ? "default"
+                    : "destructive"
+              }
+            >
+              {issuer.status}
+            </Badge>
           </p>
         </CardContent>
       </Card>
@@ -140,13 +166,13 @@ export default function IssuerDetailsPage() {
 
       {issuer.status === "pending" && (
         <div className="flex gap-4">
-          <Button onClick={handleApprove} disabled={loading}>
+          <Button onClick={handleApprove} disabled={actionLoading}>
             Approve
           </Button>
           <Button
             variant="destructive"
             onClick={handleSuspend}
-            disabled={loading}
+            disabled={actionLoading}
           >
             Suspend
           </Button>

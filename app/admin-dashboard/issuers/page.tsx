@@ -24,7 +24,7 @@ interface IssuerDocument {
 interface Issuer {
   id: string;
   role: "institution" | "professor" | "recruiter";
-  status: string;
+  status: "pending" | "approved" | "suspended";
   email: string;
   firstName?: string;
   lastName?: string;
@@ -33,7 +33,11 @@ interface Issuer {
   documents: IssuerDocument[];
 }
 
-export default function AllIssuersPage() {
+export default function AllIssuersPage({
+  filterStatus,
+}: {
+  filterStatus?: "pending" | "approved" | "suspended";
+}) {
   const [issuers, setIssuers] = useState<Issuer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +45,14 @@ export default function AllIssuersPage() {
     try {
       setLoading(true);
       const res = await fetchIssuersAdmin();
-      setIssuers(res.data.data.filter((i: Issuer) => i.status !== "approved"));
+
+      let data = res.data.data;
+
+      if (filterStatus) {
+        data = data.filter((i: Issuer) => i.status === filterStatus);
+      }
+
+      setIssuers(data);
     } catch (error) {
       console.error("Failed to fetch issuers", error);
     } finally {
@@ -51,13 +62,17 @@ export default function AllIssuersPage() {
 
   useEffect(() => {
     loadIssuers();
-  }, []);
+  }, [filterStatus]);
 
   if (loading) return <Spinner />;
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">All Issuers</h2>
+      <h2 className="text-2xl font-semibold">
+        {filterStatus
+          ? `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Issuers`
+          : "All Issuers"}
+      </h2>
 
       <Table>
         <TableHeader>
@@ -81,15 +96,21 @@ export default function AllIssuersPage() {
               <TableRow key={issuer.id}>
                 <TableCell>{displayName || "—"}</TableCell>
                 <TableCell>{issuer.email}</TableCell>
+
                 <TableCell>
                   <Badge
                     variant={
-                      issuer.status === "pending" ? "secondary" : "destructive"
+                      issuer.status === "pending"
+                        ? "secondary"
+                        : issuer.status === "approved"
+                          ? "default"
+                          : "destructive"
                     }
                   >
                     {issuer.status}
                   </Badge>
                 </TableCell>
+
                 <TableCell className="flex flex-wrap gap-2">
                   {issuer.documents.length > 0
                     ? issuer.documents.map((doc) => (
@@ -104,6 +125,7 @@ export default function AllIssuersPage() {
                       ))
                     : "—"}
                 </TableCell>
+
                 <TableCell>
                   <Link href={`/admin-dashboard/issuers/${issuer.id}`}>
                     <Button size="sm" variant="outline">
