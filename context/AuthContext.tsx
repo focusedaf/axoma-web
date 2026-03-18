@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { Role, User } from "@/types/auth";
-import { fetchMeApi, logoutIssuer } from "@/lib/api";
+import { fetchMeApi, fetchAdminMeApi, logoutIssuer,logoutAdmin } from "@/lib/api";
 
 type AuthContextType = {
   user: User | null;
@@ -35,8 +35,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(res.data.user);
       localStorage.setItem("axoma_user", JSON.stringify(res.data.user));
     } catch {
-      setUser(null);
-      localStorage.removeItem("axoma_user");
+      try {
+        const adminRes = await fetchAdminMeApi();
+        setUser(adminRes.data.data);
+        localStorage.setItem("axoma_user", JSON.stringify(adminRes.data.data));
+      } catch {
+        setUser(null);
+        localStorage.removeItem("axoma_user");
+      }
     }
   }, []);
 
@@ -63,16 +69,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("axoma_user", JSON.stringify(data));
   }, []);
 
-  const logout = useCallback(async () => {
-    setUser(null);
-    localStorage.removeItem("axoma_user");
+ const logout = useCallback(async () => {
+   setUser(null);
+   localStorage.removeItem("axoma_user");
 
-    try {
-      await logoutIssuer();
-    } catch {}
+   try {
+     if (user?.role === "admin") {
+       await logoutAdmin();
+     } else {
+       await logoutIssuer();
+     }
+   } catch {}
 
-    router.replace("/login");
-  }, [router]);
+   router.replace("/login");
+ }, [router, user]);
 
   const setRole = useCallback((role: Role) => {
     setUser((prev) => {

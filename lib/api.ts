@@ -54,6 +54,8 @@ export const logoutIssuer = () => api.post("/auth/logout");
 
 export const fetchMeApi = () => api.get("/auth/me");
 
+export const fetchAdminMeApi = () => api.get("/admin/me");
+
 export const upsertProfile = (payload: any) =>
   api.post("/onboarding/profile", payload);
 
