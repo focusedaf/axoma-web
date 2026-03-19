@@ -17,14 +17,14 @@ import { Spinner } from "@/components/ui/spinner";
 import Metamask from "../buttons/Metamask";
 import RoleSelector from "../roleSelector";
 import { registerIssuer } from "@/lib/api";
-import { Role } from "@/types/auth";
+import { IssuerRole } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 interface RegisterFormData {
   firstName: string;
   lastName: string;
   institutionName: string;
   mobileNumber: string;
-  role: Role | null;
+  role: IssuerRole | null;
   email: string;
   password: string;
 }
@@ -87,7 +87,7 @@ export function RegisterForm({
 
       const res = await registerIssuer({
         ...formData,
-        role: formData.role,
+        role: formData.role as IssuerRole,
         walletAddress,
       });
 
@@ -119,7 +119,7 @@ export function RegisterForm({
             <FieldLabel>I am a</FieldLabel>
             <RoleSelector
               value={formData.role}
-              onChange={(value: Role) =>
+              onChange={(value: IssuerRole) =>
                 setFormData((prev) => ({ ...prev, role: value }))
               }
             />

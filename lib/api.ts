@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { IssuerRole } from "@/types/auth";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
@@ -37,7 +37,7 @@ api.interceptors.response.use(
 );
 
 export const registerIssuer = (payload: {
-  role: "professor" | "recruiter" | "institution";
+  role: IssuerRole;
   firstName?: string;
   lastName?: string;
   institutionName?: string;

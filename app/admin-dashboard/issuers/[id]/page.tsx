@@ -60,13 +60,11 @@ export default function IssuerDetailsPage() {
       ? issuer.institutionName
       : `${issuer.firstName ?? ""} ${issuer.lastName ?? ""}`;
 
-  const isPDF = (url: string) => url.toLowerCase().includes(".pdf");
-
+  const isPDF = (url: string) =>
+    url.toLowerCase().endsWith(".pdf") || url.includes("/raw/upload/");
 
   const getPdfUrl = (url: string) => {
-    return url
-      .replace("/image/upload/", "/raw/upload/")
-      .replace("/upload/", "/upload/fl_attachment:false/");
+    return url.replace("/upload/", "/upload/fl_inline/");
   };
 
   const getImageUrl = (url: string) => {
@@ -98,8 +96,7 @@ export default function IssuerDetailsPage() {
         </CardContent>
       </Card>
 
-      {/* DOCUMENTS */}
-      <Card>
+       <Card>
         <CardHeader>
           <CardTitle>Documents</CardTitle>
         </CardHeader>
@@ -116,7 +113,7 @@ export default function IssuerDetailsPage() {
                 <div key={doc.id} className="border rounded-lg p-4 space-y-3">
                   <p className="text-sm font-medium">Document {index + 1}</p>
 
-               
+                  
                   {!isPDF(doc.fileUrl) && (
                     <img
                       src={imageUrl}
@@ -125,7 +122,7 @@ export default function IssuerDetailsPage() {
                     />
                   )}
 
-           
+               
                   {isPDF(doc.fileUrl) && (
                     <iframe
                       src={pdfUrl}
@@ -152,7 +149,7 @@ export default function IssuerDetailsPage() {
         </CardContent>
       </Card>
 
-
+   
       {issuer.status === "pending" && (
         <div className="flex gap-4">
           <Button onClick={() => approveIssuerAdmin(id)}>Approve</Button>
