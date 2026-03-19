@@ -31,6 +31,16 @@ interface Issuer {
   documents: IssuerDocument[];
 }
 
+
+const getViewableUrl = (url: string) => {
+  if (url.endsWith(".pdf")) {
+    return url
+      .replace("/image/upload/", "/raw/upload/")
+      .replace("/upload/", "/upload/fl_attachment:false/");
+  }
+  return url.replace("/upload/", "/upload/fl_attachment:false/");
+};
+
 export default function IssuerDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -79,7 +89,6 @@ export default function IssuerDetailsPage() {
         router.refresh();
       }, 500);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to approve issuer");
     } finally {
       setActionLoading(false);
@@ -100,7 +109,6 @@ export default function IssuerDetailsPage() {
         router.refresh();
       }, 500);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to suspend issuer");
     } finally {
       setActionLoading(false);
@@ -142,24 +150,36 @@ export default function IssuerDetailsPage() {
         </CardContent>
       </Card>
 
+   
       <Card>
         <CardHeader>
           <CardTitle>Documents</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
+        <CardContent>
           {issuer.documents.length === 0 ? (
             <p>No documents uploaded.</p>
           ) : (
-            issuer.documents.map((doc) => (
-              <Button
-                key={doc.id}
-                size="sm"
-                variant="outline"
-                onClick={() => window.open(doc.fileUrl, "_blank")}
-              >
-                {doc.type}
-              </Button>
-            ))
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                issuer.documents.forEach((doc, i) => {
+                  const url = getViewableUrl(doc.fileUrl);
+
+                  const openUrl = doc.fileUrl.endsWith(".pdf")
+                    ? `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(
+                        url,
+                      )}`
+                    : url;
+
+                  setTimeout(() => {
+                    window.open(openUrl, "_blank");
+                  }, i * 300);
+                });
+              }}
+            >
+              View Documents ({issuer.documents.length})
+            </Button>
           )}
         </CardContent>
       </Card>
