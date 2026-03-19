@@ -15,12 +15,6 @@ import { Button } from "@/components/ui/button";
 import { fetchIssuersAdmin } from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
 
-interface IssuerDocument {
-  id: string;
-  fileUrl: string;
-  type: string;
-}
-
 interface Issuer {
   id: string;
   role: "institution" | "professor" | "recruiter";
@@ -29,19 +23,8 @@ interface Issuer {
   firstName?: string;
   lastName?: string;
   institutionName?: string;
-  walletAddress?: string;
-  documents: IssuerDocument[];
+  documents: { id: string; fileUrl: string }[];
 }
-
-
-const getViewableUrl = (url: string) => {
-  if (url.endsWith(".pdf")) {
-    return url
-      .replace("/image/upload/", "/raw/upload/")
-      .replace("/upload/", "/upload/fl_attachment:false/");
-  }
-  return url.replace("/upload/", "/upload/fl_attachment:false/");
-};
 
 export default function AllIssuersPage({
   filterStatus,
@@ -55,7 +38,6 @@ export default function AllIssuersPage({
     try {
       setLoading(true);
       const res = await fetchIssuersAdmin();
-
       let data = res.data.data;
 
       if (filterStatus) {
@@ -63,8 +45,6 @@ export default function AllIssuersPage({
       }
 
       setIssuers(data);
-    } catch (error) {
-      console.error("Failed to fetch issuers", error);
     } finally {
       setLoading(false);
     }
@@ -78,11 +58,7 @@ export default function AllIssuersPage({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">
-        {filterStatus
-          ? `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Issuers`
-          : "All Issuers"}
-      </h2>
+      <h2 className="text-2xl font-semibold">All Issuers</h2>
 
       <Table>
         <TableHeader>
@@ -90,7 +66,7 @@ export default function AllIssuersPage({
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Documents</TableHead>
+            <TableHead>Docs</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -100,61 +76,28 @@ export default function AllIssuersPage({
             const displayName =
               issuer.role === "institution"
                 ? issuer.institutionName || "—"
-                : `${issuer.firstName ?? ""} ${issuer.lastName ?? ""}`.trim();
+                : `${issuer.firstName ?? ""} ${issuer.lastName ?? ""}`;
 
             return (
               <TableRow key={issuer.id}>
-                <TableCell>{displayName || "—"}</TableCell>
-                <TableCell>{issuer.email}</TableCell>
-
-                <TableCell>
-                  <Badge
-                    variant={
-                      issuer.status === "pending"
-                        ? "secondary"
-                        : issuer.status === "approved"
-                          ? "default"
-                          : "destructive"
-                    }
-                  >
-                    {issuer.status}
-                  </Badge>
+                <TableCell className="text-md font-medium">
+                  {displayName}
+                </TableCell>
+                <TableCell className="text-md font-medium">
+                  {issuer.email}
                 </TableCell>
 
-             
                 <TableCell>
-                  {issuer.documents.length > 0 ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        issuer.documents.forEach((doc, i) => {
-                          const url = getViewableUrl(doc.fileUrl);
+                  <Badge>{issuer.status}</Badge>
+                </TableCell>
 
-                          const openUrl = doc.fileUrl.endsWith(".pdf")
-                            ? `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(
-                                url,
-                              )}`
-                            : url;
-
-                          setTimeout(() => {
-                            window.open(openUrl, "_blank");
-                          }, i * 300);
-                        });
-                      }}
-                    >
-                      View Docs ({issuer.documents.length})
-                    </Button>
-                  ) : (
-                    "—"
-                  )}
+                <TableCell className="text-md font-medium">
+                  {issuer.documents.length}
                 </TableCell>
 
                 <TableCell>
                   <Link href={`/admin-dashboard/issuers/${issuer.id}`}>
-                    <Button size="sm" variant="outline">
-                      View
-                    </Button>
+                    <Button size="sm">View</Button>
                   </Link>
                 </TableCell>
               </TableRow>
