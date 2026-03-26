@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Eye, History, NotebookPen, Upload } from "lucide-react";
+import { Eye, History, NotebookPen } from "lucide-react";
+import { UploadCsvDialog } from "@/components/ui-elements/upload-csv-dialog";
 
 export function SiteHeader() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -32,17 +33,12 @@ export function SiteHeader() {
           Dashboard
         </h1>
 
-        {/* ✅ CSV Upload for ALL issuers */}
+        {/*  CSV Upload Dialog */}
         {["professor", "institution", "recruiter"].includes(userRole) && (
-          <Button
-            variant="secondary"
-            onClick={() => router.push("/issuer-dashboard/upload-csv")}
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload CSV
-          </Button>
+          <UploadCsvDialog />
         )}
 
+        {/*  Professor Actions */}
         {userRole === "professor" && (
           <div className="flex gap-2">
             <Button
@@ -74,12 +70,14 @@ export function SiteHeader() {
           </div>
         )}
 
+        {/*  Recruiter */}
         {userRole === "recruiter" && (
           <Button onClick={() => router.push("/issuer-dashboard/recruiter")}>
             Recruiter Panel
           </Button>
         )}
 
+        {/*  Institution */}
         {userRole === "institution" && (
           <Button onClick={() => router.push("/issuer-dashboard/institution")}>
             Institution Panel

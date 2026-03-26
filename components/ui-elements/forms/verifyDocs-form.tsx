@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useFileUpload,
-  FileWithPreview,
-  FileMetadata,
-} from "@/components/ui/file-upload";
+import { useFileUpload, FileMetadata } from "@/components/ui/file-upload";
 import {
   Alert,
   AlertContent,
@@ -18,7 +14,8 @@ import { FileIcon, PlusIcon, TriangleAlert, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { addDocuments } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useOnboarding } from "@/context/OnboardingContext";
+import { toast } from "sonner";
 
 interface Props {
   maxFiles?: number;
@@ -35,10 +32,10 @@ export default function VerifyDocsForm({
   multiple = true,
   className,
 }: Props) {
-  const router = useRouter();
+  const { isDocsUploaded, setIsDocsUploaded } = useOnboarding();
 
   const [
-    { files, isDragging, errors },
+    { files, isDragging },
     {
       removeFile,
       handleDragEnter,
@@ -72,6 +69,8 @@ export default function VerifyDocsForm({
       return;
     }
 
+    if (isDocsUploaded) return; // ✅ prevent re-submit
+
     setIsLoading(true);
     setServerError(null);
 
@@ -86,9 +85,10 @@ export default function VerifyDocsForm({
 
       await addDocuments(formData);
 
-      clearFiles();
+      toast.success("Documents Uploaded");
 
-      router.push("/onboarding/success");
+      clearFiles();
+      setIsDocsUploaded(true);
     } catch (error: any) {
       setServerError(
         error?.response?.data?.message || "Failed to upload documents",
@@ -101,69 +101,64 @@ export default function VerifyDocsForm({
   return (
     <form id="verify-docs-form" onSubmit={handleSubmit}>
       <div className={cn("w-full", className)}>
-        <div className="flex items-start gap-4">
-          {/* Dropzone */}
-          <div
-            className={cn(
-              "flex items-center gap-3 rounded-lg border border-dashed p-4 transition-colors flex-1",
-              isDragging
-                ? "border-primary bg-primary/5"
-                : "border-muted-foreground/25 hover:border-muted-foreground/50",
-            )}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            <input {...getInputProps()} className="sr-only" />
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-lg border border-dashed p-4",
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/25",
+          )}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <input {...getInputProps()} className="sr-only" />
 
-            <Button type="button" onClick={openFileDialog} size="sm">
-              <PlusIcon className="h-4 w-4 mr-1" />
-              Add files
-            </Button>
+          <Button type="button" onClick={openFileDialog} size="sm">
+            <PlusIcon className="h-4 w-4 mr-1" />
+            Add files
+          </Button>
 
-            <div className="flex flex-1 items-center gap-2 overflow-x-auto">
-              {files.map((fileItem) => (
-                <div key={fileItem.id} className="relative group">
-                  {isImage(fileItem.file) && fileItem.preview ? (
-                    <img
-                      src={fileItem.preview}
-                      alt={fileItem.file.name}
-                      className="h-12 w-12 rounded-lg border object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted">
-                      <FileIcon className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  )}
+          <div className="flex flex-1 items-center gap-2 overflow-x-auto">
+            {files.map((fileItem) => (
+              <div key={fileItem.id} className="relative group">
+                {isImage(fileItem.file) && fileItem.preview ? (
+                  <img
+                    src={fileItem.preview}
+                    className="h-12 w-12 rounded-lg border object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted">
+                    <FileIcon className="h-5 w-5" />
+                  </div>
+                )}
 
-                  <Button
-                    type="button"
-                    onClick={() => removeFile(fileItem.id)}
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -right-2 -top-2 size-5 rounded-full opacity-0 group-hover:opacity-100"
-                  >
-                    <XIcon className="size-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="whitespace-nowrap"
-            >
-              {isLoading ? (
-                <>
-                  <Spinner className="mr-2" />
-                  Uploading...
-                </>
-              ) : (
-                "Upload"
-              )}
-            </Button>
+                <Button
+                  type="button"
+                  onClick={() => removeFile(fileItem.id)}
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -right-2 -top-2 size-5 rounded-full opacity-0 group-hover:opacity-100"
+                >
+                  <XIcon className="size-3" />
+                </Button>
+              </div>
+            ))}
           </div>
+
+          <Button type="submit" disabled={isLoading || isDocsUploaded}>
+            {isLoading ? (
+              <>
+                <Spinner className="mr-2" />
+                Uploading...
+              </>
+            ) : isDocsUploaded ? (
+              "Uploaded"
+            ) : (
+              "Upload"
+            )}
+          </Button>
         </div>
 
         {serverError && (

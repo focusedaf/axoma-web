@@ -52,13 +52,13 @@ export function WizardLayout({
 
       <div className="flex justify-end gap-2 mt-4">
         {currentStep > 1 && (
-          <Button onClick={onBack} disabled={isPrevDisabled}>
+          <Button type="button" onClick={onBack} disabled={isPrevDisabled}>
             {prevButtonLabel || "Prev"}
           </Button>
         )}
 
         {currentStep < steps.length && (
-          <Button onClick={onNext} disabled={isNextDisabled}>
+          <Button type="button" onClick={onNext} disabled={isNextDisabled}>
             {nextButtonLabel || "Next"}
           </Button>
         )}

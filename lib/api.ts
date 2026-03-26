@@ -82,3 +82,20 @@ export const suspendIssuerAdmin = (id: string) =>
 export const createExamApi = (data: any) => api.post("/exams", data);
 
 export const saveDraftExamApi = (data: any) => api.post("/exams/draft", data);
+
+export const getMyDraftsApi = () => api.get("/exams/drafts/me");
+
+export const getDraftByIdApi = (id: string) => api.get(`/exams/drafts/${id}`);
+
+export const getMyExamsApi = () => api.get("/exams/issuer");
+
+export const uploadCandidatesApi = (examId: string, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return api.post(`/issuer/exams/${examId}/upload-candidates`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};

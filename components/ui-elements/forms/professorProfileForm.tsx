@@ -41,7 +41,7 @@ export default function ProfessorProfileForm({
       department: profile.department,
       designation: profile.designation,
       employmentType: profile.employmentType,
-      joiningYear: Number(profile.joiningYear),
+      joiningYear:profile.joiningYear,
     };
 
     try {
@@ -119,7 +119,7 @@ export default function ProfessorProfileForm({
           <FieldLabel>Joining Year</FieldLabel>
           <Input
             value={profile.joiningYear}
-            type="number"
+            type="text"
             onChange={(e) => update("joiningYear", e.target.value)}
             required
           />

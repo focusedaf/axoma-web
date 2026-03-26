@@ -5,7 +5,7 @@ import {
   IconSend,
   IconUsers,
   IconHistory,
-  IconWallet,
+  IconBrandPagekit,
   IconHome,
   IconSquare,
 } from "@tabler/icons-react";
@@ -27,6 +27,11 @@ const data = {
         title: "Create Exams",
         url: "/issuer-dashboard/professor/create-exam",
         icon: IconSend,
+      },
+      {
+        title: "View Drafts",
+        url: "/issuer-dashboard/professor/drafts",
+        icon: IconBrandPagekit,
       },
       {
         title: "Review Exams",

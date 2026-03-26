@@ -41,7 +41,7 @@ export default function RecruiterProfileForm({
       department: profile.department,
       designation: profile.designation,
       employmentType: profile.employmentType,
-      joiningYear: Number(profile.joiningYear),
+      joiningYear: profile.joiningYear,
       companyWebsite: profile.companyWebsite || undefined,
       linkedinProfile: profile.linkedinProfile || undefined,
     };
@@ -122,7 +122,7 @@ export default function RecruiterProfileForm({
           <FieldLabel>Joining Year</FieldLabel>
           <Input
             value={profile.joiningYear}
-            type="number"
+            type="text"
             onChange={(e) => update("joiningYear", e.target.value)}
             required
           />

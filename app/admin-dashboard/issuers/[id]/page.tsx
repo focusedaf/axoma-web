@@ -63,19 +63,17 @@ export default function IssuerDetailsPage() {
   const isPDF = (url: string) =>
     url.toLowerCase().endsWith(".pdf") || url.includes("/raw/upload/");
 
-  const getPdfUrl = (url: string) => {
-    return url.replace("/upload/", "/upload/fl_inline/");
-  };
+  const getPdfUrl = (url: string) =>
+    url.replace("/upload/", "/upload/fl_inline/");
 
-  const getImageUrl = (url: string) => {
-    return url.replace("/upload/", "/upload/fl_attachment:false/");
-  };
+  const getImageUrl = (url: string) =>
+    url.replace("/upload/", "/upload/fl_attachment:false/");
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Issuer Details</h2>
 
-    
+      {/* PROFILE */}
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -96,7 +94,8 @@ export default function IssuerDetailsPage() {
         </CardContent>
       </Card>
 
-       <Card>
+      {/* DOCUMENTS */}
+      <Card>
         <CardHeader>
           <CardTitle>Documents</CardTitle>
         </CardHeader>
@@ -111,9 +110,25 @@ export default function IssuerDetailsPage() {
 
               return (
                 <div key={doc.id} className="border rounded-lg p-4 space-y-3">
-                  <p className="text-sm font-medium">Document {index + 1}</p>
+                  {/* HEADER ROW */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Document {index + 1}</p>
 
-                  
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        window.open(
+                          isPDF(doc.fileUrl) ? pdfUrl : imageUrl,
+                          "_blank",
+                        )
+                      }
+                    >
+                      Open in new tab
+                    </Button>
+                  </div>
+
+                  {/* PREVIEW */}
                   {!isPDF(doc.fileUrl) && (
                     <img
                       src={imageUrl}
@@ -122,26 +137,12 @@ export default function IssuerDetailsPage() {
                     />
                   )}
 
-               
                   {isPDF(doc.fileUrl) && (
                     <iframe
                       src={pdfUrl}
                       className="w-full h-[600px] border rounded"
                     />
                   )}
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      window.open(
-                        isPDF(doc.fileUrl) ? pdfUrl : imageUrl,
-                        "_blank",
-                      )
-                    }
-                  >
-                    Open in new tab
-                  </Button>
                 </div>
               );
             })
@@ -149,12 +150,33 @@ export default function IssuerDetailsPage() {
         </CardContent>
       </Card>
 
-   
+      {/* ACTION BUTTONS */}
       {issuer.status === "pending" && (
-        <div className="flex gap-4">
-          <Button onClick={() => approveIssuerAdmin(id)}>Approve</Button>
+        <div className="flex gap-4 justify-end">
+          <Button
+            onClick={async () => {
+              try {
+                await approveIssuerAdmin(id);
+                router.push("/admin-dashboard/issuers");
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+          >
+            Approve
+          </Button>
 
-          <Button variant="destructive" onClick={() => suspendIssuerAdmin(id)}>
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              try {
+                await suspendIssuerAdmin(id);
+                router.push("/admin-dashboard/issuers");
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+          >
             Suspend
           </Button>
         </div>

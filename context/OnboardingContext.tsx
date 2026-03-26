@@ -41,6 +41,8 @@ export interface OnboardingData {
 interface ContextType {
   onboardingData: OnboardingData;
   setOnboardingData: React.Dispatch<React.SetStateAction<OnboardingData>>;
+  isDocsUploaded: boolean;
+  setIsDocsUploaded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const OnboardingContext = createContext<ContextType | undefined>(undefined);
@@ -85,8 +87,17 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
+  const [isDocsUploaded, setIsDocsUploaded] = useState(false);
+
   return (
-    <OnboardingContext.Provider value={{ onboardingData, setOnboardingData }}>
+    <OnboardingContext.Provider
+      value={{
+        onboardingData,
+        setOnboardingData,
+        isDocsUploaded,
+        setIsDocsUploaded,
+      }}
+    >
       {children}
     </OnboardingContext.Provider>
   );

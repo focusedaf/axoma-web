@@ -42,7 +42,7 @@ export default function InstitutionProfileForm({
       location: profile.location,
       institutionType: profile.institutionType,
       institutionWebsite: profile.institutionWebsite || undefined,
-      yearEstablished: Number(profile.yearEstablished),
+      yearEstablished: profile.yearEstablished,
     };
 
     try {
@@ -121,7 +121,7 @@ export default function InstitutionProfileForm({
         <Field className="w-full">
           <FieldLabel>Year Established</FieldLabel>
           <Input
-            type="number"
+            type="text"
             value={profile.yearEstablished}
             onChange={(e) => update("yearEstablished", e.target.value)}
             required

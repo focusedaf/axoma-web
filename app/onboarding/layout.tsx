@@ -2,15 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { OL } from "@/components/layout/OnboardingLayout";
-import { OnboardingProvider } from "@/context/OnboardingContext";
+import { OnboardingProvider, useOnboarding } from "@/context/OnboardingContext";
 
-export default function OnboardingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isDocsUploaded } = useOnboarding();
 
   const getStepInfo = () => {
     switch (pathname) {
@@ -35,9 +32,10 @@ export default function OnboardingLayout({
         return {
           step: 3,
           hideBack: false,
-          formId: "verify-docs-form",
           backRoute: "/onboarding/profile",
+          nextRoute: "/onboarding/success",
           nextLabel: "Continue",
+          isNextDisabled: !isDocsUploaded,
         };
 
       case "/onboarding/success":
@@ -58,32 +56,42 @@ export default function OnboardingLayout({
     }
   };
 
-  const { step, hideBack, nextRoute, formId, backRoute, nextLabel } =
-    getStepInfo();
-
-  const handleBack = () => {
-    if (backRoute) router.push(backRoute);
-  };
-
-  const handleNext = () => {
-    if (nextRoute) router.push(nextRoute);
-  };
+  const {
+    step,
+    hideBack,
+    nextRoute,
+    formId,
+    backRoute,
+    nextLabel,
+    isNextDisabled,
+  } = getStepInfo();
 
   return (
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50">
+      <OL
+        step={step}
+        totalSteps={4}
+        onBack={() => backRoute && router.push(backRoute)}
+        onNext={() => nextRoute && router.push(nextRoute)}
+        hideBack={hideBack}
+        formId={formId}
+        nextLabel={nextLabel}
+        isNextDisabled={isNextDisabled}
+      >
+        {children}
+      </OL>
+    </div>
+  );
+}
+
+export default function OnboardingLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
     <OnboardingProvider>
-      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50">
-        <OL
-          step={step}
-          totalSteps={4}
-          onBack={handleBack}
-          onNext={handleNext}
-          hideBack={hideBack}
-          formId={formId}
-          nextLabel={nextLabel}
-        >
-          {children}
-        </OL>
-      </div>
+      <InnerLayout>{children}</InnerLayout>
     </OnboardingProvider>
   );
 }
