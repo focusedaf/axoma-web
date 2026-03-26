@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { uploadCandidatesApi, getMyExamsApi } from "@/lib/api";
 import { toast } from "sonner";
-
 import {
   Dialog,
   DialogContent,
@@ -11,19 +10,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
+import { FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+interface Exam {
+  id: string;
+  title: string;
+}
 
 export function UploadCsvDialog() {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [examId, setExamId] = useState("");
-  const [exams, setExams] = useState<any[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Load issuer exams
-   */
+  // Load exams when dialog opens
   useEffect(() => {
     if (!open) return;
 
@@ -32,22 +34,18 @@ export function UploadCsvDialog() {
       .catch(() => toast.error("Failed to load exams"));
   }, [open]);
 
-  /**
-   * Upload handler
-   */
   const handleUpload = async () => {
     if (!file || !examId) {
-      toast.error("Select exam and CSV");
+      toast.error("Please select an exam and CSV file");
       return;
     }
 
     try {
       setLoading(true);
-
       const res = await uploadCandidatesApi(examId, file);
+      toast.success(`Uploaded ${res.data.count} candidates successfully!`);
 
-      toast.success(`Uploaded ${res.data.count} candidates`);
-
+      // Reset
       setOpen(false);
       setFile(null);
       setExamId("");
@@ -62,10 +60,13 @@ export function UploadCsvDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary">Upload CSV</Button>
+        <Button variant="secondary" className="flex items-center gap-2">
+          <FileUp className="h-4 w-4" />
+          Upload CSV
+        </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Upload Candidates CSV</DialogTitle>
         </DialogHeader>
@@ -78,7 +79,6 @@ export function UploadCsvDialog() {
             onChange={(e) => setExamId(e.target.value)}
           >
             <option value="">Select Exam</option>
-
             {exams.map((exam) => (
               <option key={exam.id} value={exam.id}>
                 {exam.title}
@@ -86,15 +86,16 @@ export function UploadCsvDialog() {
             ))}
           </select>
 
-          {/* File upload */}
+         
           <input
             type="file"
             accept=".csv"
+            className="block w-full text-sm text-gray-600"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
 
-          {/* Upload button */}
-          <Button onClick={handleUpload} disabled={loading}>
+          
+          <Button onClick={handleUpload} disabled={loading || !file || !examId}>
             {loading ? "Uploading..." : "Upload"}
           </Button>
         </div>

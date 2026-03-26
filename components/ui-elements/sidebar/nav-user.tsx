@@ -10,10 +10,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
@@ -25,13 +25,30 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+// Utility: convert string to title case
+const toTitleCase = (str: string) =>
+  str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuth();
   const router = useRouter();
 
-  const userName = user?.name;
-  const userEmail = user?.email;
+  if (!user) return null;
+
+  const userRole = user.role;
+
+  // Convert display name to title case
+  const userName =
+    userRole === "institution"
+      ? toTitleCase(user.institutionName ?? "")
+      : toTitleCase(`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim());
+
+  const userEmail = user.email;
   const avatarFallback = userName?.[0]?.toUpperCase() || "U";
 
   const handleEditProfile = () => {
@@ -62,11 +79,9 @@ export function NavUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {userName || "Loading..."}
-                </span>
+                <span className="truncate font-medium">{userName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {userEmail || "Fetching..."}
+                  {userEmail}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -91,11 +106,9 @@ export function NavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {userName || "Loading..."}
-                  </span>
+                  <span className="truncate font-medium">{userName}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {userEmail || "Fetching..."}
+                    {userEmail}
                   </span>
                 </div>
               </div>

@@ -89,6 +89,9 @@ export const getDraftByIdApi = (id: string) => api.get(`/exams/drafts/${id}`);
 
 export const getMyExamsApi = () => api.get("/exams/issuer");
 
+export const getExamResults = (examId: string) =>
+  api.get(`/results/exam/${examId}`);
+
 export const uploadCandidatesApi = (examId: string, file: File) => {
   const formData = new FormData();
   formData.append("file", file);
