@@ -1,11 +1,12 @@
 "use client";
+
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Eye, History, NotebookPen } from "lucide-react";
+import { Eye, History, NotebookPen, Upload } from "lucide-react";
 
 export function SiteHeader() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -30,6 +31,17 @@ export function SiteHeader() {
         >
           Dashboard
         </h1>
+
+        {/* ✅ CSV Upload for ALL issuers */}
+        {["professor", "institution", "recruiter"].includes(userRole) && (
+          <Button
+            variant="secondary"
+            onClick={() => router.push("/issuer-dashboard/upload-csv")}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload CSV
+          </Button>
+        )}
 
         {userRole === "professor" && (
           <div className="flex gap-2">
@@ -63,21 +75,15 @@ export function SiteHeader() {
         )}
 
         {userRole === "recruiter" && (
-          <div className="flex gap-2">
-            <Button onClick={() => router.push("/issuer-dashboard/recruiter")}>
-              Recruiter Panel
-            </Button>
-          </div>
+          <Button onClick={() => router.push("/issuer-dashboard/recruiter")}>
+            Recruiter Panel
+          </Button>
         )}
 
         {userRole === "institution" && (
-          <div className="flex gap-2">
-            <Button
-              onClick={() => router.push("/issuer-dashboard/institution")}
-            >
-              Institution Panel
-            </Button>
-          </div>
+          <Button onClick={() => router.push("/issuer-dashboard/institution")}>
+            Institution Panel
+          </Button>
         )}
       </div>
     </header>

@@ -16,8 +16,10 @@ import { Step1Settings } from "@/components/ui-elements/exam-builder/step-1-sett
 import { Step2Questions } from "@/components/ui-elements/exam-builder/step-2-questions";
 import { Step3Preview } from "@/components/ui-elements/exam-builder/step-3-preview";
 import { Step4Publish } from "@/components/ui-elements/exam-builder/step-4-publish";
-import { examStore } from "@/lib/examStore";
-
+import { createExamApi, saveDraftExamApi } from "@/lib/api";
+import { uploadToIPFS } from "@/lib/ipfs";
+import { ethers } from "ethers";
+import ExamRegistryABI from "@/abi/ExamRegistry.json";
 interface ExamBuilderProps {
   role: "professor" | "institution";
   redirectPath: string;
@@ -34,9 +36,6 @@ export function ExamBuilder({ role, redirectPath }: ExamBuilderProps) {
     defaultValues: examData,
     mode: "onBlur",
   });
-
-  const isNextDisabled = currentStep === 1 && !step1Form.formState.isValid;
-  const isPublishStep = currentStep === 4;
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -55,35 +54,69 @@ export function ExamBuilder({ role, redirectPath }: ExamBuilderProps) {
 
   const handleCancel = () => {
     toast.info("Exam creation canceled");
-    setTimeout(() => router.push(redirectPath), 800);
+    router.push(redirectPath);
   };
 
-  const handleSaveDraft = () => {
-    const draftData = {
-      ...examData,
-      ...step1Form.getValues(),
-    };
+  const handleSaveDraft = async () => {
+    try {
+      const payload = {
+        ...step1Form.getValues(),
+        questions: examData.questions,
+        status: "Draft",
+      };
 
-    examStore.saveDraft(draftData);
-    toast.success("Draft saved successfully");
+      await saveDraftExamApi(payload);
 
-    setTimeout(() => router.push(redirectPath), 800);
+      toast.success("Draft saved");
+      router.push(redirectPath);
+    } catch {
+      toast.error("Failed to save draft");
+    }
   };
 
-  const handlePublish = () => {
-    const finalExamData: ExamData = {
-      ...step1Form.getValues(),
-      questions: examData.questions,
-    };
+  const handlePublish = async () => {
+    try {
+      if (!(window as any).ethereum) {
+        toast.error("MetaMask not found");
+        return;
+      }
 
-    examStore.publish(finalExamData);
-    toast.success(
-      role === "institution"
-        ? "Institutional exam published"
-        : "Exam published successfully",
-    );
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
 
-    setTimeout(() => router.push(redirectPath), 800);
+      const contract = new ethers.Contract(
+        process.env.NEXT_PUBLIC_EXAM_REGISTRY_ADDRESS!,
+        ExamRegistryABI,
+        signer,
+      );
+
+      const examPayload = {
+        title: examData.title,
+        duration: examData.duration,
+        scheduledOn: examData.scheduledOn,
+        questions: examData.questions,
+      };
+
+      toast.loading("Uploading exam...");
+      const cid = await uploadToIPFS(examPayload);
+
+      toast.loading("Publishing to blockchain...");
+      const tx = await contract.publishExam(cid);
+      await tx.wait();
+
+      await createExamApi({
+        title: examData.title,
+        duration: examData.duration,
+        scheduledOn: examData.scheduledOn,
+        cid,
+      });
+
+      toast.success("Exam published successfully");
+      router.push(redirectPath);
+    } catch (err) {
+      console.error(err);
+      toast.error("Publish failed");
+    }
   };
 
   return (
@@ -100,21 +133,13 @@ export function ExamBuilder({ role, redirectPath }: ExamBuilderProps) {
       onBack={handleBack}
       onCancel={handleCancel}
       onSaveDraft={handleSaveDraft}
-      onPublish={isPublishStep ? handlePublish : undefined}
-      isNextDisabled={isNextDisabled}
+      onPublish={currentStep === 4 ? handlePublish : undefined}
     >
       {currentStep === 1 && <Step1Settings form={step1Form} />}
       {currentStep === 2 && (
         <Step2Questions examData={examData} setExamData={setExamData} />
       )}
-      {currentStep === 3 && (
-        <Step3Preview
-          examData={{
-            ...step1Form.getValues(),
-            questions: examData.questions,
-          }}
-        />
-      )}
+      {currentStep === 3 && <Step3Preview examData={examData} />}
       {currentStep === 4 && <Step4Publish />}
     </WizardLayout>
   );

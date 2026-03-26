@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const settingsSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters."),
-  duration: z.number().min(1, "Duration must be at least 1 minute."),
+  title: z.string().min(3),
+  duration: z.number().min(1),
   instructions: z.string().optional(),
+  scheduledOn: z.string().min(1, "Schedule date required"),
   examType: z.enum(["mcq", "descriptive"]),
   deliveryType: z.enum(["paper", "computer"]),
   questionView: z.enum(["all-in-one", "one-by-one"]),
@@ -14,7 +15,6 @@ export const settingsSchema = z.object({
 });
 
 export type SettingsData = z.infer<typeof settingsSchema>;
-
 
 export type QuestionOption = {
   id: string;
@@ -32,7 +32,6 @@ export type Question = {
   answer?: string;
 };
 
-
 export type ExamData = SettingsData & {
   questions: Question[];
 };
@@ -40,6 +39,7 @@ export type ExamData = SettingsData & {
 export const defaultExamData: ExamData = {
   title: "",
   duration: 60,
+  scheduledOn: "",
   instructions: "",
   examType: "mcq",
   deliveryType: "computer",

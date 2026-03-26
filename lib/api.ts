@@ -78,3 +78,7 @@ export const approveIssuerAdmin = (id: string) =>
 
 export const suspendIssuerAdmin = (id: string) =>
   api.patch(`/admin/issuers/${id}/suspend`);
+
+export const createExamApi = (data: any) => api.post("/exams", data);
+
+export const saveDraftExamApi = (data: any) => api.post("/exams/draft", data);
