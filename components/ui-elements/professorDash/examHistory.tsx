@@ -43,15 +43,14 @@ export function ExamHistoryTable() {
     async function loadExams() {
       try {
         const res = await getMyExamsApi();
-        const examList = res?.data?.exams ?? [];
+        const examList = res?.data ?? [];
 
-        // ⚡ Show ALL exams, no filtering on published
         setExams(
           examList.map((exam: any) => ({
             id: exam.id,
             title: exam.title,
             course: exam.course || "General",
-            endedOn: new Date(exam.scheduledOn),
+            endedOn: exam.scheduledOn ? new Date(exam.scheduledOn) : new Date(),
             submissions: {
               submitted: exam.submissions?.submitted ?? 0,
               total: exam.submissions?.total ?? 0,
@@ -67,6 +66,7 @@ export function ExamHistoryTable() {
         setExams([]);
       }
     }
+
     loadExams();
   }, []);
 
@@ -91,7 +91,7 @@ export function ExamHistoryTable() {
     <div className="w-full px-8 py-6">
       <h1 className="text-2xl font-semibold mb-6">Exam History</h1>
       <div className="border rounded-lg overflow-hidden">
-        <Table className="text-center">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Exam Title</TableHead>
@@ -128,7 +128,7 @@ export function ExamHistoryTable() {
                       {exam.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex justify-center gap-2">
+                  <TableCell>
                     {exam.status === "Grading Complete" ? (
                       <Button
                         size="sm"
@@ -143,7 +143,7 @@ export function ExamHistoryTable() {
                         size="sm"
                         onClick={() =>
                           router.push(
-                            `/dashboard/professor/review-exam/${exam.id}`,
+                            `/issuer-dashboard/professor/review-exam/${exam.id}`,
                           )
                         }
                       >

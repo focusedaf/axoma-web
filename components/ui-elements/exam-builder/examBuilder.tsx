@@ -16,7 +16,12 @@ import { Step1Settings } from "./step-1-settings";
 import { Step2Questions } from "./step-2-questions";
 import { Step3Preview } from "./step-3-preview";
 import { Step4Publish } from "./step-4-publish";
-import { createExamApi, saveDraftExamApi, getDraftByIdApi } from "@/lib/api";
+import {
+  createExamApi,
+  saveDraftExamApi,
+  getDraftByIdApi,
+  markPublishedApi,
+} from "@/lib/api";
 import { ethers } from "ethers";
 import ExamRegistryABI from "@/abi/ExamRegistry.json";
 
@@ -217,11 +222,15 @@ export function ExamBuilder({ role, redirectPath }: any) {
         draftId,
       });
 
-      const { cid } = res.data;
+      const { cid, id } = res.data;
 
       const tx = await contract.publishExam(cid);
       await tx.wait();
 
+      await markPublishedApi(id, {
+        txHash: tx.hash,
+        publishedAt: new Date().toISOString(),
+      });
       toast.success("Published successfully");
       router.push(redirectPath);
     } catch (err) {

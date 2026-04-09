@@ -42,26 +42,25 @@ export function ReviewExamTable() {
   useEffect(() => {
     async function loadExams() {
       try {
-        const res = await getMyExamsApi();
-        const examList = res?.data?.exams ?? [];
+       const res = await getMyExamsApi();
+       const examList = res?.data ?? [];
 
-        // ⚡ Show ALL exams, no filtering on published
-        setExams(
-          examList.map((exam: any) => ({
-            id: exam.id,
-            title: exam.title,
-            course: exam.course || "General",
-            conductedOn: new Date(exam.scheduledOn),
-            submissions: {
-              submitted: exam.submissions?.submitted ?? 0,
-              total: exam.submissions?.total ?? 0,
-            },
-            status:
-              exam.status === "Completed"
-                ? "Grading Complete"
-                : "Pending Grading",
-          })),
-        );
+       setExams(
+         examList.map((exam: any) => ({
+           id: exam.id,
+           title: exam.title,
+           course: exam.course || "General",
+           conductedOn: new Date(exam.scheduledOn),
+           submissions: {
+             submitted: exam.submissions?.submitted ?? 0,
+             total: exam.submissions?.total ?? 0,
+           },
+           status:
+             exam.status === "Completed"
+               ? "Grading Complete"
+               : "Pending Grading",
+         })),
+       );
       } catch (err) {
         console.error(err);
         setExams([]);
@@ -91,7 +90,7 @@ export function ReviewExamTable() {
     <div className="w-full px-8 py-6">
       <h1 className="text-2xl font-semibold mb-6">Review Exams</h1>
       <div className="border rounded-lg overflow-hidden">
-        <Table className="text-center">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Exam Title</TableHead>
@@ -126,7 +125,7 @@ export function ReviewExamTable() {
                       {exam.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex justify-center gap-2">
+                  <TableCell>
                     {exam.status === "Pending Grading" ? (
                       <Button
                         size="sm"
@@ -145,7 +144,7 @@ export function ReviewExamTable() {
                           variant="outline"
                           onClick={() =>
                             router.push(
-                              `/dashboard/professor/review-exam/${exam.id}`,
+                              `/issuer-dashboard/professor/review-exam/${exam.id}`,
                             )
                           }
                         >

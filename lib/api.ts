@@ -79,6 +79,9 @@ export const suspendIssuerAdmin = (id: string) =>
 
 export const createExamApi = (data: any) => api.post("/exams", data);
 
+export const markPublishedApi = (examId: string, data: any) =>
+  api.post(`/exams/${examId}/mark-published`, data);
+
 export const saveDraftExamApi = (data: any) => api.post("/exams/draft", data);
 
 export const getMyDraftsApi = () => api.get("/exams/drafts/me");
