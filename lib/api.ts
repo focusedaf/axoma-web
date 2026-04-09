@@ -54,7 +54,6 @@ export const logoutIssuer = () => api.post("/auth/logout");
 
 export const fetchMeApi = () => api.get("/auth/me");
 
-
 export const upsertProfile = (payload: any) =>
   api.post("/onboarding/profile", payload);
 
@@ -87,6 +86,10 @@ export const getMyDraftsApi = () => api.get("/exams/drafts/me");
 export const getDraftByIdApi = (id: string) => api.get(`/exams/drafts/${id}`);
 
 export const getMyExamsApi = () => api.get("/exams/issuer");
+
+export const deleteDraftApi = (id: string) => {
+  return api.delete(`/exams/drafts/${id}`);
+};
 
 export const getExamResults = (examId: string) =>
   api.get(`/results/exam/${examId}`);

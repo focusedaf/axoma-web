@@ -11,6 +11,7 @@ interface DescriptiveEditorProps {
     text?: string;
     image?: string | null;
     answer?: string;
+    marks?: string;
   };
   onCancel: () => void;
   onSave: (question: {
@@ -19,6 +20,7 @@ interface DescriptiveEditorProps {
     text: string;
     image?: string | null;
     answer: string;
+    marks: string;
   }) => void;
 }
 
@@ -31,6 +33,7 @@ export default function DescriptiveEditor({
   const [image, setImage] = useState(initialData?.image || "");
   const [uploading, setUploading] = useState(false);
   const [answer, setAnswer] = useState(initialData?.answer || "");
+   const [marks, setMarks] = useState(initialData?.marks || "1");
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -74,6 +77,7 @@ export default function DescriptiveEditor({
       image: image || null,
       id: initialData?.id,
       answer,
+      marks,
     });
   }
 
@@ -82,6 +86,16 @@ export default function DescriptiveEditor({
       <div className="space-y-2">
         <Label>Question</Label>
         <Input value={text} onChange={(e) => setText(e.target.value)} />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Marks</Label>
+        <Input
+          type="text"
+          min="1"
+          value={marks}
+          onChange={(e) => setMarks(e.target.value)}
+        />
       </div>
 
       <div className="space-y-2">

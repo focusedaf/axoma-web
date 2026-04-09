@@ -21,7 +21,7 @@ export function ExamHeader({
   onPublish,
 }: ExamHeaderProps) {
   const title =
-    role === "institution" ? "Create Institutional Exam" : "Create Manual Exam";
+    role === "institution" ? "Create Institutional Exam" : "Create Exam";
 
   const subtitle =
     role === "institution"
@@ -29,7 +29,7 @@ export function ExamHeader({
       : "Craft a new exam with a modern and intuitive interface";
 
   return (
-    <div className="flex items-center justify-between pb-4 border-b">
+    <div className="flex items-center justify-between pb-2 border-b">
       <div className="flex items-center gap-3">
         {currentStep > 1 && (
           <Button variant="ghost" size="icon" onClick={onBack}>

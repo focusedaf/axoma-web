@@ -83,9 +83,7 @@ export function ExamBuilder({ role, redirectPath }: any) {
         const parsed: ExamData = {
           title: draft.title || "",
           duration: draft.duration?.toString() || "",
-          scheduledOn: draft.scheduledOn
-            ? new Date(draft.scheduledOn).toISOString().slice(0, 16)
-            : "",
+          scheduledOn: draft.scheduledOnDraft || "",
           instructions: draft.instructions || "",
           questions: draft.questions || [],
           examType: draft.examType || "mcq",

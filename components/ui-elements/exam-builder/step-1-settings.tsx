@@ -31,43 +31,30 @@ export function Step1Settings({ form }: Step1SettingsProps) {
     <Form {...form}>
       <div className="space-y-6">
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="flex border-b rounded-md overflow-hidden">
+          {/* <TabsList className="flex border-b rounded-md overflow-hidden">
             <TabsTrigger value="basic" className="flex-1">
               Basic
             </TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <TabsContent value="basic">
-            <Card className="mt-4">
-              <CardContent className="p-6 space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Exam Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="instructions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Instructions</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
+            <Card className="mt-1">
+              <CardContent className="p-6 space-y-3">
                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Exam Title</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="examType"
@@ -79,7 +66,7 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
@@ -88,13 +75,16 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                             <SelectItem value="descriptive">
                               Descriptive
                             </SelectItem>
+                            <SelectItem value="mixed">Mixed</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="duration"
@@ -113,18 +103,31 @@ export function Step1Settings({ form }: Step1SettingsProps) {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="scheduledOn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Schedule Date</FormLabel>
+                        <FormControl>
+                          <Input type="datetime-local" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <FormField
                   control={form.control}
-                  name="scheduledOn"
+                  name="instructions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Schedule Date</FormLabel>
+                      <FormLabel>Instructions</FormLabel>
                       <FormControl>
-                        <Input type="datetime-local" {...field} />
+                        <Textarea {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />

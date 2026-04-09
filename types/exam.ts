@@ -5,7 +5,7 @@ export const settingsSchema = z.object({
   duration: z.string().min(1, "Duration is required"),
   instructions: z.string().optional(),
   scheduledOn: z.string().min(1, "Schedule date required"),
-  examType: z.enum(["mcq", "descriptive"]),
+  examType: z.enum(["mcq", "descriptive", "mixed"]),
 });
 
 export type SettingsData = z.infer<typeof settingsSchema>;
@@ -19,7 +19,7 @@ export type QuestionOption = {
 export type Question = {
   id: string;
   text: string;
-  marks: number;
+  marks: string;
   type: "mcq" | "descriptive";
   options?: QuestionOption[];
   image?: string | null;

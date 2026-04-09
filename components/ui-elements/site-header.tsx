@@ -129,36 +129,18 @@ export function SiteHeader() {
               <NotebookPen className="mr-2 h-4 w-4" />
               Create Exam
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => router.push("/issuer-dashboard/professor/history")}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View History
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() =>
-                router.push("/issuer-dashboard/professor/review-exam")
-              }
-            >
-              <History className="mr-2 h-4 w-4" />
-              Review Exam
-            </Button>
           </div>
         )}
 
         {userRole === "recruiter" && (
           <Button onClick={() => router.push("/issuer-dashboard/recruiter")}>
-            Recruiter Panel
+           Create Assessment
           </Button>
         )}
 
         {userRole === "institution" && (
           <Button onClick={() => router.push("/issuer-dashboard/institution")}>
-            Institution Panel
+            Create Exam
           </Button>
         )}
       </div>

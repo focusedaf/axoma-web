@@ -96,16 +96,15 @@ export function Step2Questions({ examData, setExamData }: Step2QuestionsProps) {
 
             <CardContent className="space-y-3">
               {q.image && (
-                <div>
-                  <img
-                    src={q.image}
-                    alt="Question"
-                    className="max-h-48 rounded border"
-                  />
-                </div>
+                <img
+                  src={q.image}
+                  alt="Question"
+                  className="max-h-48 rounded border"
+                />
               )}
 
-              {examType === "mcq" && q.options?.length ? (
+             
+              {q.type === "mcq" && q.options?.length && (
                 <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                   {q.options.map((opt) => (
                     <li
@@ -118,11 +117,10 @@ export function Step2Questions({ examData, setExamData }: Step2QuestionsProps) {
                     </li>
                   ))}
                 </ul>
-              ) : examType === "mcq" ? (
-                <p className="text-muted-foreground">No options provided.</p>
-              ) : null}
+              )}
 
-              {examType === "descriptive" && q.answer && (
+              
+              {q.type === "descriptive" && q.answer && (
                 <div className="pt-3 border-t">
                   <p className="text-sm font-medium text-muted-foreground mb-2">
                     Answer:

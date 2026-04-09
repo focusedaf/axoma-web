@@ -12,6 +12,7 @@ interface McqEditorProps {
     text?: string;
     image?: string | null;
     options?: { id: string; text: string; isCorrect: boolean }[];
+    marks?: string;
   };
   onCancel: () => void;
   onSave: (question: {
@@ -20,6 +21,7 @@ interface McqEditorProps {
     text: string;
     image?: string | null;
     options: { id: string; text: string; isCorrect: boolean }[];
+    marks: string;
   }) => void;
 }
 
@@ -39,6 +41,7 @@ export default function McqEditor({
     ],
   );
   const [uploading, setUploading] = useState(false);
+  const [marks, setMarks] = useState(initialData?.marks || "1");
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -82,6 +85,7 @@ export default function McqEditor({
       image: image || null,
       options,
       id: initialData?.id,
+      marks,
     });
   }
 
@@ -100,6 +104,15 @@ export default function McqEditor({
       <div className="space-y-2">
         <Label>Question</Label>
         <Input value={text} onChange={(e) => setText(e.target.value)} />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Marks</Label>
+        <Input
+          type="text"
+          value={marks}
+          onChange={(e) => setMarks(e.target.value)}
+        />
       </div>
 
       <div className="space-y-2">
