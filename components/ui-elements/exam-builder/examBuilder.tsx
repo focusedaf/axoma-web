@@ -194,8 +194,8 @@ export function ExamBuilder({ role, redirectPath }: any) {
       const values = step1Form.getValues();
 
       const finalData = {
-        ...examData,
         ...values,
+        ...examData,
       };
 
       const provider = new ethers.BrowserProvider((window as any).ethereum);
@@ -231,6 +231,7 @@ export function ExamBuilder({ role, redirectPath }: any) {
         txHash: tx.hash,
         publishedAt: new Date().toISOString(),
       });
+      console.log("FINAL DATA", finalData);
       toast.success("Published successfully");
       router.push(redirectPath);
     } catch (err) {

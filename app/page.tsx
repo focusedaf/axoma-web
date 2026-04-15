@@ -6,14 +6,16 @@ import { Benefits } from "@/components/ui-elements/landing/Benefits";
 import { HowItWorks } from "@/components/ui-elements/landing/HowItWorks";
 import { WhyAxomaSection } from "@/components/ui-elements/landing/WhyAxoma";
 import Footer from "@/components/ui-elements/landing/Footer";
-
+import DownloadBanner from "@/components/ui-elements/landing/DownloadBanner";
 export default function Home() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <DownloadBanner />
       <section id="hero">
         <Hero />
       </section>
+
       <DashboardPreview />
       <section id="features">
         <Features />
