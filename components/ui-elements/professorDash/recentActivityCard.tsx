@@ -6,19 +6,38 @@ interface RecentActivityCardProps {
 }
 
 export function RecentActivityCard({ activities }: RecentActivityCardProps) {
+  const normalized = activities.map((activity) => ({
+    ...activity,
+    time: activity.time ? new Date(activity.time) : null,
+  }));
+
+  function formatDate(date: Date | null) {
+    if (!date || isNaN(date.getTime())) return "—";
+
+    return date.toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
+
       <CardContent className="flex flex-col gap-4">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex items-center justify-between">
+        {normalized.map((activity) => (
+          <div key={activity.id} className="flex justify-between">
             <p className="text-sm text-muted-foreground">
               {activity.description}
             </p>
+
             <p className="text-sm text-muted-foreground whitespace-nowrap pl-4">
-              {activity.time}
+              {formatDate(activity.time)}
             </p>
           </div>
         ))}

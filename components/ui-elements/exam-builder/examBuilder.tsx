@@ -16,12 +16,14 @@ import { Step1Settings } from "./step-1-settings";
 import { Step2Questions } from "./step-2-questions";
 import { Step3Preview } from "./step-3-preview";
 import { Step4Publish } from "./step-4-publish";
+
 import {
   createExamApi,
   saveDraftExamApi,
   getDraftByIdApi,
   markPublishedApi,
 } from "@/lib/api";
+
 import { ethers } from "ethers";
 import ExamRegistryABI from "@/abi/ExamRegistry.json";
 
@@ -36,11 +38,23 @@ export function ExamBuilder({ role, redirectPath }: any) {
   const [examData, setExamData] = useState<ExamData>(defaultExamData);
   const [loadingDraft, setLoadingDraft] = useState(false);
 
+  const [publishing, setPublishing] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [txLoading, setTxLoading] = useState(false);
+
   const step1Form = useForm<SettingsData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: defaultExamData,
     mode: "onChange",
   });
+
+  const canPublish = () => {
+    if (!examData.title) return false;
+    if (!examData.scheduledOn) return false;
+
+    const start = new Date(examData.scheduledOn).getTime();
+    return start > 0;
+  };
 
   const switchToSepolia = async () => {
     if (!(window as any).ethereum) return;
@@ -48,7 +62,7 @@ export function ExamBuilder({ role, redirectPath }: any) {
     try {
       await (window as any).ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }], // Sepolia
+        params: [{ chainId: "0xaa36a7" }],
       });
     } catch (err: any) {
       if (err.code === 4902) {
@@ -68,9 +82,7 @@ export function ExamBuilder({ role, redirectPath }: any) {
             },
           ],
         });
-      } else {
-        throw err;
-      }
+      } else throw err;
     }
   };
 
@@ -83,23 +95,22 @@ export function ExamBuilder({ role, redirectPath }: any) {
         setLoadingDraft(true);
 
         const res = await getDraftByIdApi(draftId);
-        const draft = res.data;
+        const d = res.data;
 
         const parsed: ExamData = {
-          title: draft.title || "",
-          duration: draft.duration?.toString() || "",
-          scheduledOn: draft.scheduledOnDraft || "",
-          instructions: draft.instructions || "",
-          questions: draft.questions || [],
-          examType: draft.examType || "mcq",
+          title: d.title || "",
+          duration: d.duration?.toString() || "",
+          scheduledOn: d.scheduledOnDraft || "",
+          instructions: d.instructions || "",
+          questions: d.questions || [],
+          examType: d.examType || "mcq",
         };
 
         setExamData(parsed);
         step1Form.reset(parsed);
 
         toast.success("Draft loaded");
-      } catch (err) {
-        console.error(err);
+      } catch {
         toast.error("Failed to load draft");
       } finally {
         setLoadingDraft(false);
@@ -109,102 +120,66 @@ export function ExamBuilder({ role, redirectPath }: any) {
     loadDraft();
   }, [draftId]);
 
-  useEffect(() => {
-    if (currentStep === 1) {
-      step1Form.reset(examData);
-    }
-  }, [currentStep, examData]);
-
   const handleNext = async () => {
     if (currentStep === 1) {
-      const isValid = await step1Form.trigger();
+      const valid = await step1Form.trigger();
+      if (!valid) return toast.error("Fill required fields");
 
-      if (!isValid) {
-        toast.error("Fill required fields");
-        return;
-      }
-
-      const values = step1Form.getValues();
-
-      setExamData((prev) => ({
-        ...prev,
-        ...values,
-        questions: prev.questions,
-      }));
+      setExamData((p) => ({ ...p, ...step1Form.getValues() }));
     }
 
     setCurrentStep((p) => p + 1);
   };
 
   const handleBack = () => {
-    if (currentStep === 2) {
-      const values = step1Form.getValues();
-
-      setExamData((prev) => ({
-        ...prev,
-        ...values,
-        questions: prev.questions,
-      }));
-    }
-
+    setExamData((p) => ({ ...p, ...step1Form.getValues() }));
     setCurrentStep((p) => p - 1);
   };
 
   const handleSaveDraft = async () => {
     try {
-      const values = step1Form.getValues();
+      const v = step1Form.getValues();
 
-      const payload = {
+      await saveDraftExamApi({
         id: draftId || undefined,
-        title: values.title,
-        duration: values.duration,
-        scheduledOn: values.scheduledOn,
-        instructions: values.instructions,
+        title: v.title,
+        duration: v.duration,
+        scheduledOn: v.scheduledOn,
+        instructions: v.instructions,
         questions: examData.questions,
         examType: examData.examType,
-      };
+      });
 
-      await saveDraftExamApi(payload);
-
-      toast.success(draftId ? "Draft updated" : "Draft saved");
-
+      toast.success("Draft saved");
       router.push(`${redirectPath}/drafts`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to save draft");
     }
   };
 
   const handlePublish = async () => {
     try {
+      if (!canPublish()) {
+        toast.error("Invalid exam schedule");
+        return;
+      }
+
       if (!(window as any).ethereum) {
         toast.error("MetaMask not found");
         return;
       }
 
+      setPublishing(true);
+
+      setWalletLoading(true);
       await switchToSepolia();
+      setWalletLoading(false);
 
       const contractAddress = process.env.NEXT_PUBLIC_EXAM_REGISTRY_ADDRESS;
 
-      if (!contractAddress) {
-        toast.error("Contract address missing");
-        return;
-      }
-
-      const values = step1Form.getValues();
-
-      const finalData = {
-        ...values,
-        ...examData,
-      };
+      if (!contractAddress) throw new Error("Missing contract");
 
       const provider = new ethers.BrowserProvider((window as any).ethereum);
-
-      const network = await provider.getNetwork();
-      if (network.chainId !== 11155111n) {
-        toast.error("Please switch to Sepolia network");
-        return;
-      }
 
       const signer = await provider.getSigner();
 
@@ -215,33 +190,42 @@ export function ExamBuilder({ role, redirectPath }: any) {
       );
 
       const res = await createExamApi({
-        title: finalData.title,
-        duration: Number(finalData.duration),
-        scheduledOn: finalData.scheduledOn,
-        questions: finalData.questions,
+        title: examData.title,
+        duration: Number(examData.duration),
+        scheduledOn: examData.scheduledOn,
+        questions: examData.questions,
         draftId,
       });
 
       const { cid, id } = res.data;
 
+      setTxLoading(true);
+      toast.info("Confirm transaction in wallet...");
+
       const tx = await contract.publishExam(cid);
       await tx.wait();
+
+      setTxLoading(false);
 
       await markPublishedApi(id, {
         txHash: tx.hash,
         publishedAt: new Date().toISOString(),
       });
-      console.log("FINAL DATA", finalData);
-      toast.success("Published successfully");
+
+      toast.success("Exam published");
       router.push(redirectPath);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       toast.error("Publish failed");
+    } finally {
+      setPublishing(false);
+      setWalletLoading(false);
+      setTxLoading(false);
     }
   };
 
   if (loadingDraft) {
-    return <div className="p-6 text-muted-foreground">Loading draft...</div>;
+    return <div className="p-6">Loading draft...</div>;
   }
 
   return (
@@ -259,16 +243,20 @@ export function ExamBuilder({ role, redirectPath }: any) {
       onCancel={() => router.push(redirectPath)}
       onSaveDraft={handleSaveDraft}
       onPublish={currentStep === 4 ? handlePublish : undefined}
+      isNextDisabled={publishing || walletLoading || txLoading}
     >
       {currentStep === 1 && <Step1Settings form={step1Form} />}
-
       {currentStep === 2 && (
         <Step2Questions examData={examData} setExamData={setExamData} />
       )}
-
       {currentStep === 3 && <Step3Preview examData={examData} />}
-
-      {currentStep === 4 && <Step4Publish />}
+      {currentStep === 4 && (
+        <Step4Publish
+          publishing={publishing}
+          walletLoading={walletLoading}
+          txLoading={txLoading}
+        />
+      )}
     </WizardLayout>
   );
 }
