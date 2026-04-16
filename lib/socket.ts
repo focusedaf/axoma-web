@@ -1,17 +1,30 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
-let socket: any;
+let socket: Socket | null = null;
 
-export const connectSocket = (user: { id: string; role: string }) => {
+export const createSocket = (
+  userId: string,
+  role: string,
+  clientType: "APP" | "WEB",
+) => {
+  if (socket?.connected) return socket;
+
   socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
-    auth: {
-      userId: user.id,
-      role: user.role,
-    },
     withCredentials: true,
+    transports: ["websocket"],
+    auth: {
+      userId,
+      role,
+      clientType,
+    },
   });
 
   return socket;
 };
 
 export const getSocket = () => socket;
+
+export const disconnectSocket = () => {
+  socket?.disconnect();
+  socket = null;
+};

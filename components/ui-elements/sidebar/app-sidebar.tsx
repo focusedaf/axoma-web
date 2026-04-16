@@ -8,7 +8,10 @@ import {
   IconBrandPagekit,
   IconHome,
   IconSquare,
+  IconAlertTriangle,
+  IconClipboardList,
 } from "@tabler/icons-react";
+
 import { NavMain } from "@/components/ui-elements/sidebar/nav-main";
 import { NavUser } from "@/components/ui-elements/sidebar/nav-user";
 import {
@@ -17,11 +20,13 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+
 import { useAuth } from "@/context/AuthContext";
 
 const data = {
   navMain: {
     common: [{ title: "Home", url: "/", icon: IconHome }],
+
     professor: [
       {
         title: "Create Exams",
@@ -29,26 +34,27 @@ const data = {
         icon: IconSend,
       },
       {
-        title: "View Drafts",
+        title: "Drafts",
         url: "/issuer-dashboard/professor/drafts",
         icon: IconBrandPagekit,
       },
       {
         title: "Review Exams",
         url: "/issuer-dashboard/professor/review-exam",
-        icon: IconUsers,
+        icon: IconClipboardList,
       },
       {
-        title: "Exam History",
+        title: "History",
         url: "/issuer-dashboard/professor/history",
         icon: IconHistory,
       },
       {
-        title: "View Violations",
+        title: "Violations",
         url: "/issuer-dashboard/professor/violations",
-        icon: IconUsers,
+        icon: IconAlertTriangle,
       },
     ],
+
     recruiter: [
       {
         title: "Create Assessments",
@@ -56,31 +62,32 @@ const data = {
         icon: IconSend,
       },
       {
-        title: "Manage Applicant",
+        title: "Applicants",
         url: "/issuer-dashboard/recruiter/assessments",
         icon: IconUsers,
       },
       {
-        title: "View Violations",
+        title: "Violations",
         url: "/issuer-dashboard/recruiter/violations",
-        icon: IconUsers,
+        icon: IconAlertTriangle,
       },
     ],
+
     institution: [
       {
         title: "Create Exams",
         url: "/issuer-dashboard/institution/create-exam",
-        icon: IconUsers,
+        icon: IconSend,
       },
       {
         title: "Manage Exams",
         url: "/issuer-dashboard/institution/exams",
-        icon: IconUsers,
+        icon: IconClipboardList,
       },
       {
-        title: "View Violations",
+        title: "Violations",
         url: "/issuer-dashboard/institution/violations",
-        icon: IconUsers,
+        icon: IconAlertTriangle,
       },
     ],
   },
@@ -88,6 +95,7 @@ const data = {
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
+
   const userRole = user?.role as
     | "professor"
     | "recruiter"
@@ -122,16 +130,24 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="p-4 border-b">
-        <span className="font-semibold text-3xl ">Axoma</span>
+    <Sidebar
+      collapsible="offcanvas"
+      className="border-r bg-background/80 backdrop-blur-xl"
+      {...props}
+    >
+      {/* HEADER */}
+      <SidebarHeader className="p-4 border-b flex justify-center ml-5">
+        
+        <span className="font-bold text-2xl tracking-tight">Axoma</span>
       </SidebarHeader>
 
+      {/* CONTENT */}
       <SidebarContent className="p-4">
         <NavMain items={items} />
       </SidebarContent>
 
-      <SidebarFooter>
+      {/* FOOTER */}
+      <SidebarFooter className="border-t p-3">
         <NavUser />
       </SidebarFooter>
     </Sidebar>

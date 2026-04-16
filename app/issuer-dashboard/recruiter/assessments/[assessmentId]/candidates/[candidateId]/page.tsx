@@ -1,74 +1,48 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getExamResults, getViolationsByExamApi } from "@/lib/api";
 
 export default function CandidateDetailPage() {
+  const { examId, candidateId } = useParams();
+
+  const [data, setData] = useState<any>(null);
+  const [violations, setViolations] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const results = await getExamResults(examId as string);
+      const candidate = results.data.find(
+        (r: any) => r.candidateId === candidateId,
+      );
+
+      setData(candidate);
+
+      const v = await getViolationsByExamApi(examId as string);
+      setViolations(v.data.filter((x: any) => x.candidateId === candidateId));
+    };
+
+    fetchData();
+  }, [examId, candidateId]);
+
+  if (!data) return <div>Loading...</div>;
+
   return (
-    <div className="space-y-8">
-     
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">John Doe</h1>
-          <p className="text-muted-foreground text-sm">john@example.com</p>
+    <div>
+      <h1 className="text-xl font-bold">
+        {data.candidate.firstName} {data.candidate.lastName}
+      </h1>
+
+      <p>{data.candidate.email}</p>
+      <p>Score: {data.score ?? "Not graded"}</p>
+
+      <h3 className="mt-4 font-semibold">Violations</h3>
+      {violations.map((v) => (
+        <div key={v.id}>
+          {v.type} ({v.severity})
         </div>
-        <Badge variant="secondary">Completed</Badge>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Score</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-green-500">
-            82%
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Violation Risk</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-yellow-500">
-            Medium
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Duration</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold">58 mins</CardContent>
-        </Card>
-      </div>
-
-   
-      <Card>
-        <CardHeader>
-          <CardTitle>Violation Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <div className="flex justify-between">
-            <span>Tab switching detected</span>
-            <Badge variant="outline">2 times</Badge>
-          </div>
-
-          <Separator />
-
-          <div className="flex justify-between">
-            <span>Multiple faces detected</span>
-            <Badge variant="destructive">1 time</Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-    
-      <div className="flex gap-4">
-        <Button>Approve</Button>
-        <Button variant="destructive">Disqualify</Button>
-      </div>
+      ))}
     </div>
   );
 }

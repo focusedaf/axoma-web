@@ -1,79 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getViolationsByExamApi } from "@/lib/api";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-
-type Case = {
-  id: string;
-  candidate: string;
-  warnings: number;
-  issues: string[];
-  status: "completed" | "terminated";
-};
-
-const cases: Case[] = [
-  {
-    id: "1",
-    candidate: "John Doe",
-    warnings: 3,
-    issues: ["Multiple faces detected"],
-    status: "terminated",
-  },
-  {
-    id: "2",
-    candidate: "Jane Smith",
-    warnings: 2,
-    issues: ["Tab switching", "Window focus lost"],
-    status: "completed",
-  },
-];
-
-const getStatusBadge = (status: Case["status"]) => {
-  return status === "terminated" ? (
-    <Badge variant="destructive">Assessment Terminated</Badge>
-  ) : (
-    <Badge variant="outline">Completed</Badge>
-  );
-};
 
 export default function RecruiterViolationsPage() {
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">Assessment Integrity Report</h1>
-        <p className="text-sm text-muted-foreground">
-          Backend Developer Hiring Test
-        </p>
-      </div>
+  const { examId } = useParams();
+  const [data, setData] = useState<any[]>([]);
 
-      {cases.map((item) => (
-        <Card key={item.id}>
-          <CardHeader className="flex justify-between items-center">
-            <CardTitle>{item.candidate}</CardTitle>
-            {getStatusBadge(item.status)}
+  useEffect(() => {
+    if (!examId) return;
+
+    getViolationsByExamApi(examId as string).then((res) => setData(res.data));
+  }, [examId]);
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Integrity Report</h1>
+
+      {data.map((v) => (
+        <Card key={v.id}>
+          <CardHeader className="flex justify-between">
+            <CardTitle>{v.candidate?.email}</CardTitle>
+            <Badge variant="destructive">{v.severity}</Badge>
           </CardHeader>
 
-          <CardContent className="space-y-4">
-            <div className="flex justify-between text-sm">
-              <span>Warnings Issued</span>
-              <span className="font-medium">{item.warnings}/3</span>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2 text-sm">
-              <p className="font-medium">Flagged Events</p>
-              {item.issues.map((issue, idx) => (
-                <p key={idx} className="text-muted-foreground">
-                  • {issue}
-                </p>
-              ))}
-            </div>
-
-            <div className="text-xs text-muted-foreground pt-2">
-              Enforcement handled automatically by proctor engine.
-            </div>
+          <CardContent className="text-sm">
+            <p>Type: {v.type}</p>
+            <p className="text-muted-foreground">
+              {JSON.stringify(v.metadata)}
+            </p>
           </CardContent>
         </Card>
       ))}

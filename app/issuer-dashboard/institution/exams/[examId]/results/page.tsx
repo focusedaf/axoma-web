@@ -1,38 +1,40 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getExamResults, gradeResultApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 export default function InstitutionResultsPage() {
+  const { examId } = useParams();
+  const [results, setResults] = useState<any[]>([]);
+
+  const load = async () => {
+    const res = await getExamResults(examId as string);
+    setResults(res.data);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const grade = async (id: string) => {
+    await gradeResultApi(id, 80);
+    load();
+  };
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Exam Results Summary</h2>
+    <div>
+      <h1 className="text-xl mb-4">Results</h1>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Passed Students</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-green-500">
-            72
-          </CardContent>
-        </Card>
+      {results.map((r) => (
+        <div key={r.id} className="border p-3 mb-2">
+          <p>{r.candidate.email}</p>
+          <p>Score: {r.score}</p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Failed Students</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-red-500">
-            28
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Evaluation</CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold">8</CardContent>
-        </Card>
-      </div>
+          <Button onClick={() => grade(r.id)}>Grade 80</Button>
+        </div>
+      ))}
     </div>
   );
 }

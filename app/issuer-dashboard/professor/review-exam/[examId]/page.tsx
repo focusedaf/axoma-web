@@ -3,87 +3,63 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getExamResults } from "@/lib/api";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { getExamResults, gradeResultApi } from "@/lib/api";
 
 export default function GradeExamPage() {
-  const params = useParams();
-  const examId = params.examId as string;
-
+  const { examId } = useParams();
   const [results, setResults] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
-  const PAGE_SIZE = 5;
+  const [scores, setScores] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    async function loadResults() {
-      try {
-        const res = await getExamResults(examId);
-        setResults(res.data);
-      } catch (err) {
-        console.error(err);
-      }
+    async function load() {
+      const res = await getExamResults(String(examId));
+      setResults(res.data);
     }
-    loadResults();
+    load();
   }, [examId]);
 
-  const totalPages = Math.ceil(results.length / PAGE_SIZE);
-  const paginated = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const handleGrade = async (id: string) => {
+    await gradeResultApi(id, scores[id] || 0);
+    alert("Graded");
+  };
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Submissions</h1>
+    <div className="p-8 space-y-6">
+      <h1 className="text-2xl font-bold">Submissions</h1>
 
-      {paginated.length === 0 ? (
-        <p>No submissions yet</p>
-      ) : (
-        paginated.map((r) => (
-          <Card key={r.id} className="mb-4">
-            <CardHeader>
-              <CardTitle>Candidate: {r.candidate.email}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <pre>{JSON.stringify(r.answers, null, 2)}</pre>
-              <p>Score: {r.score}</p>
-            </CardContent>
-          </Card>
-        ))
-      )}
+      {results.map((r) => (
+        <Card key={r.id}>
+          <CardHeader>
+            <CardTitle>
+              {r.candidate.firstName} {r.candidate.lastName}
+            </CardTitle>
+          </CardHeader>
 
-      <div className="mt-4 flex justify-center">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+          <CardContent className="space-y-4">
+            <pre className="text-xs bg-muted p-3 rounded">
+              {JSON.stringify(r.answers, null, 2)}
+            </pre>
+
+            <div className="flex gap-3">
+              <Input
+                type="number"
+                placeholder="Score"
+                value={scores[r.id] || ""}
+                onChange={(e) =>
+                  setScores((p) => ({
+                    ...p,
+                    [r.id]: Number(e.target.value),
+                  }))
+                }
               />
-            </PaginationItem>
 
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  isActive={page === i + 1}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+              <Button onClick={() => handleGrade(r.id)}>Submit Score</Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

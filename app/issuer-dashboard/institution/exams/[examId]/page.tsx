@@ -1,60 +1,66 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getExamResults, getViolationsByExamApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, AlertTriangle, BarChart3, Settings } from "lucide-react";
 
 export default function ExamOverviewPage() {
+  const { examId } = useParams();
+  const [stats, setStats] = useState({
+    total: 0,
+    avg: 0,
+    violations: 0,
+  });
+
+  useEffect(() => {
+    const load = async () => {
+      const resultsRes = await getExamResults(examId as string);
+      const violationsRes = await getViolationsByExamApi(examId as string);
+
+      const results = resultsRes.data;
+      const violations = violationsRes.data;
+
+      const avg =
+        results.reduce((acc: number, r: any) => acc + r.score, 0) /
+        (results.length || 1);
+
+      setStats({
+        total: results.length,
+        avg: Math.round(avg),
+        violations: violations.length,
+      });
+    };
+
+    load();
+  }, [examId]);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Semester 1 - Chemistry Mid Term
-          </h1>
-          <p className="text-muted-foreground text-sm">Exam ID: #EX1024</p>
-        </div>
+    <div className="grid gap-4 md:grid-cols-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Total Submissions</CardTitle>
+        </CardHeader>
+        <CardContent className="text-3xl">{stats.total}</CardContent>
+      </Card>
 
-        <Button>Edit Exam</Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Violations</CardTitle>
+        </CardHeader>
+        <CardContent className="text-3xl text-yellow-500">
+          {stats.violations}
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex justify-between flex-row items-center">
-            <CardTitle>Total Students</CardTitle>
-            <Users className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent className="text-3xl font-bold">128</CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex justify-between flex-row items-center">
-            <CardTitle>Violations</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-yellow-500">
-            14
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex justify-between flex-row items-center">
-            <CardTitle>Average Score</CardTitle>
-            <BarChart3 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent className="text-3xl font-bold text-green-500">
-            76%
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex justify-between flex-row items-center">
-            <CardTitle>Status</CardTitle>
-            <Settings className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="text-lg font-medium">Active</CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Avg Score</CardTitle>
+        </CardHeader>
+        <CardContent className="text-3xl text-green-500">
+          {stats.avg}%
+        </CardContent>
+      </Card>
     </div>
   );
 }

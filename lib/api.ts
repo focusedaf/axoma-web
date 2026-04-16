@@ -107,3 +107,18 @@ export const uploadCandidatesApi = (examId: string, file: File) => {
     },
   });
 };
+
+export const getNotificationsApi = () => api.get("/notifications");
+
+export const markAsReadApi = (id: string) =>
+  api.patch(`/notifications/${id}/read`);
+
+export const markAllAsReadApi = () => api.patch("/notifications/read-all");
+
+export const getViolationsByExamApi = (examId: string) =>
+  api.get(`/violations/exam/${examId}`);
+
+export const gradeResultApi = (resultId: string, score: number) =>
+  api.patch(`/results/${resultId}/grade`, { score });
+
+
